@@ -14,9 +14,12 @@
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@prisma/client": "^6.2.0",
+    "bullmq": "^5.77.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.0",
+    "ioredis": "^5.10.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
