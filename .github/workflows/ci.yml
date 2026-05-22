@@ -1,6 +1,8 @@
-name: CI
+name: Linting and Building
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
