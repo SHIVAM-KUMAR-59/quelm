@@ -5,6 +5,7 @@ import { prisma } from "./config/prisma.config";
 import { logger } from "./config/logger.config";
 import { JobQueue } from "./queues";
 import { AgentRegistry } from "./agents/registry";
+import { Orchestrator } from "./orchestrator";
 
 dotenv.config();
 
@@ -17,16 +18,24 @@ app.get("/health", (_, res) => {
   res.json({ status: "ok" });
 });
 
+// Initialize orchestrator
+const orchestrator = new Orchestrator(prisma);
+
 const start = async (): Promise<void> => {
   try {
+    // Verify database connection
     await prisma.$connect();
-
     logger.success("Database connected successfully");
 
+    // Start agents
     await AgentRegistry.startAgents();
 
-    const PORT = process.env.PORT || 8000;
+    // Start orchestrator
+    await orchestrator.start();
+    logger.success("Orchestrator started successfully");
 
+    // Start Express server
+    const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
       logger.success(`Server running on port ${PORT}`);
     });
@@ -43,14 +52,16 @@ const shutdown = async (): Promise<void> => {
   logger.info("Shutting down server...");
 
   try {
+    // Stop in reverse order of startup
+    await orchestrator.stop();
+    logger.success("Orchestrator stopped");
+
     await AgentRegistry.stopAgents();
 
     await JobQueue.closeAllQueues();
-
     logger.success("All queues closed");
 
     await prisma.$disconnect();
-
     logger.success("Database disconnected");
 
     process.exit(0);
