@@ -66,10 +66,10 @@ const RunPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-3">
         {/* TODO: MATCH THIS EVERYWHERE */}
-        {/* <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-xl">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-xl">
           <Activity className="h-3.5 w-3.5" />
           Distributed Execution Monitoring
-        </div> */}
+        </div>
 
         <div className="space-y-2">
           <h1 className="text-4xl font-semibold tracking-tight">Workflow Runs</h1>

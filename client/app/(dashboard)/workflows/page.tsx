@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderGit2, Plus } from "lucide-react";
+import { FolderGit2, Plus, Workflow as WorkflowIcon } from "lucide-react";
 
 import { useWorkflows } from "@/hooks/use-workflow";
 import WorkflowCard from "@/components/workflows/WorkflowCard";
@@ -26,6 +26,10 @@ const WorkflowPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-xl">
+            <WorkflowIcon className="h-3.5 w-3.5" />
+            Visual Workflow Builder
+          </div>
           <h1 className="text-3xl font-semibold tracking-tight">Workflows</h1>
 
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
