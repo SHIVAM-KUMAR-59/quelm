@@ -18,6 +18,7 @@ export class WorkflowRunRepository {
       },
       include: {
         tasks: true,
+        workflow: true,
       },
     });
   }
@@ -29,6 +30,7 @@ export class WorkflowRunRepository {
       },
       include: {
         tasks: true,
+        workflow: true,
       },
     });
   }
