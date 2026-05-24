@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { createWorkflowRouter } from "./workflow/workflow.routes";
 import { createWorkflowRunRouter } from "./run/route.routes";
 import { createAgentRouter } from "./agent/agent.routes";
+import { createDashboardRouter } from "./dashboard/dashboard.routes";
 
 export const createApiRoutes = (orchestrator: Orchestrator, prisma: PrismaClient) => {
   const router = Router();
@@ -11,10 +12,12 @@ export const createApiRoutes = (orchestrator: Orchestrator, prisma: PrismaClient
   const workflowRouter = createWorkflowRouter(orchestrator, prisma);
   const workflowRunRouter = createWorkflowRunRouter(prisma);
   const agentRouter = createAgentRouter(prisma);
+  const dashboardRouter = createDashboardRouter(prisma);
 
   router.use("/api/workflow", workflowRouter);
   router.use("/api/runs", workflowRunRouter);
   router.use("/api/agents", agentRouter);
+  router.use("/api/dashboard", dashboardRouter);
 
   return router;
 };
