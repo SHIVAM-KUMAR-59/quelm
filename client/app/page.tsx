@@ -1,65 +1,663 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import {
+  Activity,
+  ArrowRight,
+  Bot,
+  BrainCircuit,
+  CheckCircle2,
+  Cpu,
+  GitBranch,
+  Play,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  Workflow,
+  Zap,
+} from "lucide-react";
+
+const FEATURES = [
+  {
+    icon: Workflow,
+    title: "Visual Workflow Builder",
+    description:
+      "Compose distributed AI workflows visually with drag-and-drop nodes and dependency graphs.",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Modular AI Agents",
+    description:
+      "Plug in LLM, HTTP, Transform, and custom agents without touching orchestration logic.",
+  },
+  {
+    icon: Activity,
+    title: "Live Run Monitoring",
+    description:
+      "Watch every workflow execute in real time with live node status updates and streaming events.",
+  },
+  {
+    icon: Server,
+    title: "Distributed Workers",
+    description:
+      "Scale horizontally with independent worker processes powered by BullMQ and Redis.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Automatic Retries",
+    description:
+      "Built-in exponential backoff, dead-letter queues, and fault-tolerant execution.",
+  },
+  {
+    icon: GitBranch,
+    title: "Dependency Resolution",
+    description:
+      "Parallel execution, sequential chains, and fan-out flows handled automatically.",
+  },
+];
+
+const STATS = [
+  {
+    value: "Realtime",
+    label: "Workflow orchestration",
+  },
+  {
+    value: "Distributed",
+    label: "Worker architecture",
+  },
+  {
+    value: "Fault-Tolerant",
+    label: "Execution pipeline",
+  },
+  {
+    value: "Extensible",
+    label: "Agent system",
+  },
+];
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen overflow-hidden bg-black text-white">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_35%)]" />
+
+        <div className="absolute left-1/2 top-0 h-150 w-150 -translate-x-1/2 rounded-full bg-white/3 blur-3xl" />
+
+        <div className="absolute bottom-0 left-0 h-100 w-100 rounded-full bg-zinc-500/10 blur-3xl" />
+      </div>
+
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-black/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/3">
+              <Workflow className="h-5 w-5 text-white" />
+            </div>
+
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">Quelm</h1>
+
+              <p className="text-xs text-zinc-500">Distributed Workflow Platform</p>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-8 md:flex">
+            <a
+              href="#features"
+              className="text-sm text-zinc-400 transition-colors hover:text-white"
+            >
+              Features
+            </a>
+
+            <a
+              href="#architecture"
+              className="text-sm text-zinc-400 transition-colors hover:text-white"
+            >
+              Architecture
+            </a>
+
+            <a
+              href="#agents"
+              className="text-sm text-zinc-400 transition-colors hover:text-white"
+            >
+              Agents
+            </a>
+          </div>
+
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white px-4 py-2 text-sm font-medium text-black transition-all duration-300 hover:scale-[1.03] hover:bg-zinc-200"
+          >
+            Open Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative">
+        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 pb-24 pt-28 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-4 py-2 text-xs font-medium text-zinc-300 backdrop-blur-xl">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-Native Workflow Orchestration
+          </div>
+
+          <h1 className="mt-8 max-w-5xl text-5xl font-semibold tracking-tight text-white md:text-7xl">
+            Build and orchestrate
+            <span className="bg-linear-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+              {" "}
+              distributed AI workflows
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-8 max-w-3xl text-lg leading-relaxed text-zinc-400">
+            Quelm is a distributed workflow platform where AI agents execute visually
+            composed pipelines in real time with retries, orchestration, dependency
+            resolution, and live observability built in.
           </p>
+
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+            <Link
+              href="/workflows"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.03] hover:bg-zinc-200"
+            >
+              <Play className="h-4 w-4" />
+              Start Building
+            </Link>
+
+            <Link
+              href="/agents"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/3 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/5"
+            >
+              Explore Agents
+            </Link>
+          </div>
+
+          {/* Hero Preview */}
+          {/* Hero Preview */}
+          <div className="relative mt-24 w-full max-w-6xl overflow-hidden rounded-4xl border border-white/10 bg-white/3 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_40%)]" />
+
+            <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr_320px]">
+              {/* Sidebar */}
+              <div className="rounded-3xl border border-white/10 bg-black/40 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/4">
+                    <Workflow className="h-5 w-5 text-white" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold tracking-tight text-white">
+                      Agent Nodes
+                    </h3>
+
+                    <p className="text-xs text-zinc-500">Drag onto canvas</p>
+                  </div>
+                </div>
+
+                <div className="mt-8 space-y-3">
+                  {[
+                    {
+                      icon: BrainCircuit,
+                      title: "LLM Agent",
+                      description: "Prompt + reasoning",
+                    },
+                    {
+                      icon: Activity,
+                      title: "HTTP Agent",
+                      description: "REST API requests",
+                    },
+                    {
+                      icon: Cpu,
+                      title: "Transform Agent",
+                      description: "Shape workflow data",
+                    },
+                    {
+                      icon: Bot,
+                      title: "Webhook Agent",
+                      description: "Trigger external apps",
+                    },
+                  ].map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <div
+                        key={item.title}
+                        className="rounded-2xl border border-white/10 bg-white/3 p-4 transition-all duration-300 hover:border-white/20 hover:bg-white/5"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-black/40">
+                            <Icon className="h-4 w-4 text-white" />
+                          </div>
+
+                          <div>
+                            <h4 className="text-sm font-medium text-white">
+                              {item.title}
+                            </h4>
+
+                            <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Canvas */}
+              <div className="relative min-h-140 overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a]">
+                {/* subtle grid */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-size-[32px_32px]" />
+
+                {/* soft radial */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_60%)]" />
+
+                {/* floating workflow badge */}
+                <div className="absolute right-6 top-6 z-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+
+                    <p className="text-xs font-medium text-emerald-300">
+                      Workflow Running
+                    </p>
+                  </div>
+
+                  <p className="mt-1 text-[11px] text-emerald-200/70">
+                    3 active nodes • 1 completed
+                  </p>
+                </div>
+
+                {/* Edge SVG */}
+                <svg className="absolute inset-0 z-0 h-full w-full">
+                  {/* Edge 1 */}
+                  <path
+                    d="M 300 160 C 420 160, 420 260, 540 260"
+                    stroke="rgba(255,255,255,0.25)"
+                    strokeWidth="2"
+                    fill="transparent"
+                    strokeDasharray="7 7"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Edge 2 */}
+                  <path
+                    d="M 700 300 C 820 300, 820 410, 930 410"
+                    stroke="rgba(255,255,255,0.25)"
+                    strokeWidth="2"
+                    fill="transparent"
+                    strokeDasharray="7 7"
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                {/* Node 1 */}
+                <div className="absolute left-14 top-20 z-10 w-65 rounded-3xl border border-white/10 bg-zinc-900/95 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/4">
+                        <BrainCircuit className="h-5 w-5 text-white" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">
+                          Research Company
+                        </h3>
+
+                        <p className="mt-1 text-xs text-zinc-500">LLM Agent</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-white/5 bg-black/40 p-4">
+                    <p className="text-[12px] leading-relaxed text-zinc-400">
+                      Analyze company websites and generate structured business insights.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
+                    <span>gpt-4.1</span>
+                    <span>critical</span>
+                  </div>
+
+                  {/* output handle */}
+                  <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-zinc-900 bg-white" />
+                </div>
+
+                {/* Node 2 */}
+                <div className="absolute left-[46%] top-[38%] z-10 w-67.5 rounded-3xl border border-white/10 bg-zinc-900/95 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/4">
+                        <Cpu className="h-5 w-5 text-white" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">
+                          Summarize Output
+                        </h3>
+
+                        <p className="mt-1 text-xs text-zinc-500">Transform Agent</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-1 h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-white/5 bg-black/40 p-4">
+                    <p className="text-[12px] leading-relaxed text-zinc-400">
+                      Convert raw findings into concise markdown summaries and structured
+                      output.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
+                    <span>parallel task</span>
+                    <span>retry enabled</span>
+                  </div>
+
+                  {/* handles */}
+                  <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-zinc-900 bg-white" />
+
+                  <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-zinc-900 bg-white" />
+                </div>
+
+                {/* Node 3 */}
+                <div className="absolute bottom-16 right-10 z-10 w-65 rounded-3xl border border-white/10 bg-zinc-900/95 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/4">
+                        <Activity className="h-5 w-5 text-white" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-white">Notify Slack</h3>
+
+                        <p className="mt-1 text-xs text-zinc-500">HTTP Agent</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-1 h-2.5 w-2.5 rounded-full bg-zinc-500" />
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-white/5 bg-black/40 p-4">
+                    <p className="text-[12px] leading-relaxed text-zinc-400">
+                      Send execution summaries to the engineering Slack channel.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
+                    <span>POST webhook</span>
+                    <span>non-critical</span>
+                  </div>
+
+                  {/* input handle */}
+                  <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-zinc-900 bg-white" />
+                </div>
+              </div>
+
+              {/* Right Panel */}
+              <div className="rounded-3xl border border-white/10 bg-black/40 p-5">
+                <div>
+                  <h3 className="text-sm font-semibold tracking-tight text-white">
+                    Node Configuration
+                  </h3>
+
+                  <p className="mt-1 text-xs text-zinc-500">Configure selected node</p>
+                </div>
+
+                <div className="mt-8 space-y-5">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-zinc-400">Prompt Template</p>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+                      <p className="text-xs leading-relaxed text-zinc-500">
+                        Research the company website and summarize: products, funding,
+                        team size, and market positioning.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-zinc-400">Model</p>
+
+                    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+                      <span className="text-sm text-white">GPT-4.1</span>
+
+                      <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] text-zinc-400">
+                        Active
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-zinc-400">Temperature</p>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+                      <div className="flex items-center justify-between text-xs text-zinc-500">
+                        <span>0.2</span>
+                        <span>Deterministic</span>
+                      </div>
+
+                      <div className="mt-3 h-1.5 rounded-full bg-white/10">
+                        <div className="h-full w-[20%] rounded-full bg-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200">
+                    Save Configuration
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-39.5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-39.5"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Stats */}
+      <section className="relative border-y border-white/5 bg-white/2">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-14 md:grid-cols-4">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-3xl border border-white/5 bg-black/40 p-6 backdrop-blur-xl"
+            >
+              <h3 className="text-3xl font-semibold tracking-tight">{stat.value}</h3>
+
+              <p className="mt-2 text-sm text-zinc-500">{stat.label}</p>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="relative py-28">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-4 py-2 text-xs font-medium text-zinc-300">
+              <Zap className="h-3.5 w-3.5" />
+              Platform Features
+            </div>
+
+            <h2 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
+              Designed for modern AI orchestration
+            </h2>
+
+            <p className="mt-6 text-lg leading-relaxed text-zinc-400">
+              Quelm combines distributed systems architecture with AI-native workflow
+              tooling to provide a resilient execution platform for autonomous pipelines.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+
+              return (
+                <div
+                  key={feature.title}
+                  className="group rounded-[28px] border border-white/5 bg-white/2 p-8 backdrop-blur-xl transition-all duration-300 hover:border-white/10 hover:bg-white/4 hover:shadow-[0_0_40px_rgba(255,255,255,0.03)]"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/3">
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+
+                  <h3 className="mt-8 text-xl font-semibold tracking-tight">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-4 text-sm leading-relaxed text-zinc-500">
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Architecture */}
+      <section id="architecture" className="relative border-t border-white/5 py-28">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-2">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-4 py-2 text-xs font-medium text-zinc-300">
+              <Server className="h-3.5 w-3.5" />
+              System Architecture
+            </div>
+
+            <h2 className="mt-6 text-4xl font-semibold tracking-tight">
+              Distributed by design
+            </h2>
+
+            <p className="mt-6 text-lg leading-relaxed text-zinc-400">
+              Under the hood, Quelm orchestrates distributed task execution through Redis
+              queues, BullMQ workers, event-driven orchestration, PostgreSQL persistence,
+              and real-time observability streams.
+            </p>
+
+            <div className="mt-10 space-y-5">
+              {[
+                "BullMQ queues with exponential backoff",
+                "Event-driven downstream task dispatch",
+                "Persistent workflow execution history",
+                "Worker heartbeats and live health monitoring",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-4">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-white" />
+
+                  <p className="text-zinc-400">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Architecture Visual */}
+          <div className="relative rounded-4xl border border-white/10 bg-white/2 p-8 backdrop-blur-xl">
+            <div className="grid gap-6">
+              {[
+                {
+                  title: "Workflow Builder",
+                  subtitle: "Visual orchestration layer",
+                },
+                {
+                  title: "Redis + BullMQ",
+                  subtitle: "Distributed task queues",
+                },
+                {
+                  title: "Workers",
+                  subtitle: "Parallel execution agents",
+                },
+                {
+                  title: "PostgreSQL",
+                  subtitle: "Execution persistence",
+                },
+              ].map((item, idx) => (
+                <div
+                  key={item.title}
+                  className="relative rounded-3xl border border-white/10 bg-black/40 p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold tracking-tight">{item.title}</h3>
+
+                      <p className="mt-1 text-sm text-zinc-500">{item.subtitle}</p>
+                    </div>
+
+                    <div className="h-3 w-3 rounded-full bg-white/60" />
+                  </div>
+
+                  {idx !== 3 && (
+                    <div className="absolute left-1/2 top-full h-6 w-px -translate-x-1/2 bg-white/10" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative border-t border-white/5 py-28">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <div className="rounded-[36px] border border-white/10 bg-white/3 px-8 py-20 backdrop-blur-2xl">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] border border-white/10 bg-white/4">
+              <Bot className="h-9 w-9 text-white" />
+            </div>
+
+            <h2 className="mt-8 text-4xl font-semibold tracking-tight md:text-5xl">
+              Build resilient AI pipelines
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400">
+              Orchestrate distributed workflows, autonomous agents, and realtime execution
+              pipelines with Quelm.
+            </p>
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.03] hover:bg-zinc-200"
+              >
+                Launch Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/workflows/new"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/3 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/5"
+              >
+                Create Workflow
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 py-10">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-zinc-500 md:flex-row">
+          <p>© 2026 Quelm. Distributed workflow orchestration platform.</p>
+
+          <div className="flex items-center gap-6">
+            <a href="#" className="transition-colors hover:text-white">
+              Documentation
+            </a>
+
+            <a href="#" className="transition-colors hover:text-white">
+              GitHub
+            </a>
+
+            <a href="#" className="transition-colors hover:text-white">
+              API
+            </a>
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 }
