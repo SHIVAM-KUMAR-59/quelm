@@ -123,22 +123,25 @@ const RunMonitorPage = () => {
       return;
     }
 
-    if (latestEvent.taskId) {
-      const task = run.tasks?.find((t: Task) => t.id === latestEvent.taskId);
-      if (!task) return;
+    if (!latestEvent.taskId || !latestEvent.status) return;
 
-      const definition = run.workflow?.definition as WorkflowDefinition;
-      const node = definition?.nodes?.find((n) => n.name === task.name);
-      if (!node) return;
+    // Find the task in the initial data to get the node name
+    const task = run.tasks?.find((t: Task) => t.id === latestEvent.taskId);
+    if (!task) return;
 
-      const newStatus = STATUS_TO_NODE[latestEvent.status as TaskStatus] ?? "idle";
+    // Find the node in the definition by task name
+    const definition = run.workflow?.definition as WorkflowDefinition;
+    const node = definition?.nodes?.find((n) => n.name === task.name);
+    if (!node) return;
 
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === node.id ? { ...n, data: { ...n.data, status: newStatus } } : n,
-        ),
-      );
-    }
+    // Use status FROM THE EVENT, not from run.tasks
+    const newStatus = STATUS_TO_NODE[latestEvent.status as TaskStatus] ?? "idle";
+
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === node.id ? { ...n, data: { ...n.data, status: newStatus } } : n,
+      ),
+    );
   }, [events]);
 
   const onNodeClick = (_: React.MouseEvent, node: Node<AgentNodeData>) => {

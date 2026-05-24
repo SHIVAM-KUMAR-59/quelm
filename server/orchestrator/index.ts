@@ -4,6 +4,7 @@ import { redis } from "../config/redis.config";
 import { logger } from "../config/logger.config";
 import { Edge, JsonInput, Node, WorkflowDefinition } from "../utils/types";
 import { JobQueue } from "../queues";
+import { runEmitter } from "../events/run.emitter";
 
 const agentTypes: AgentType[] = [
   AgentType.EXTRACTION_AGENT,
@@ -199,6 +200,12 @@ export class Orchestrator {
       where: { runId: completedTask.runId },
     });
 
+    runEmitter.emit(`run:${completedTask.runId}`, {
+      taskId: completedTask.id,
+      status: TaskStatus.COMPLETED,
+      output: completedTask.output,
+    });
+
     // Find unblocked tasks
     // A task is unblocked when all IDs in its dependsOn are COMPLETED
     const completedTaskIds = new Set(
@@ -247,6 +254,11 @@ export class Orchestrator {
         config: node.config,
       });
 
+      // Emit task dispatched event for SSE
+      runEmitter.emit(`run:${completedTask.runId}`, {
+        taskId: task.id,
+        status: TaskStatus.RUNNING,
+      });
       logger.info(`Dispatched unblocked task: ${task.name} [${task.type}]`);
     }
 
@@ -264,6 +276,13 @@ export class Orchestrator {
           output: completedTask.output as Prisma.InputJsonValue,
           completedAt: new Date(),
         },
+      });
+
+      // Emit the event
+      runEmitter.emit(`run:${completedTask.runId}`, {
+        type: "RUN_COMPLETED",
+        runId: completedTask.runId,
+        status: RunStatus.COMPLETED,
       });
 
       logger.success(`Workflow run completed: ${completedTask.runId}`);

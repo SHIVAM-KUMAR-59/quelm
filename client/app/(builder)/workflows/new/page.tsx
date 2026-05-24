@@ -26,6 +26,14 @@ import { useCreateWorkflow } from "@/hooks/use-workflow";
 import { AgentNodeData, AgentType } from "@/lib/types";
 
 const nodeTypes = { agentNode: AgentNode };
+const AGENT_LABELS: Record<string, string> = {
+  LLM_AGENT: "LLM Node",
+  HTTP_AGENT: "HTTP Node",
+  TRANSFORM_AGENT: "Transform Node",
+  EXTRACTION_AGENT: "Extraction Node",
+  NOTIFICATION_AGENT: "Notification Node",
+  STORAGE_AGENT: "Storage Node",
+};
 
 let nodeCounter = 0;
 const getId = () => `node_${nodeCounter++}`;
@@ -77,7 +85,7 @@ const NewWorkflowPage = () => {
         position,
         data: {
           type,
-          label: `${type} Node`,
+          label: AGENT_LABELS[type] ?? type,
           status: "idle",
           critical: true,
           config: {} as AgentNodeData["config"],
