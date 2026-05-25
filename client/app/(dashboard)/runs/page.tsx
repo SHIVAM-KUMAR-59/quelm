@@ -59,7 +59,6 @@ const RunPage = () => {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col gap-3">
-        {/* TODO: MATCH THIS EVERYWHERE */}
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-xl">
           <Activity className="h-3.5 w-3.5" />
           Distributed Execution Monitoring
