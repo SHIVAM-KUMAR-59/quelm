@@ -1,3 +1,5 @@
+![Dashboard](./preview.png)
+
 # Quelm
 
 A distributed multi-agent workflow platform where AI agents collaborate asynchronously to execute complex workflows at scale. Built with event-driven architecture, message queues, real-time orchestration, and a visual workflow builder.
