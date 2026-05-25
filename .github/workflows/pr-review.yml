@@ -1,0 +1,125 @@
+name: PR Review Bot
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  pr-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR head
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/origin/pr-head"
+
+      - name: Analyze commits
+        id: analyze
+        run: |
+          PR_COMMITS=$(git rev-list --count origin/main..origin/pr-head)
+          MERGE_COMMITS=$(git log --merges origin/main..origin/pr-head --oneline)
+
+          echo "pr_commits=$PR_COMMITS" >> $GITHUB_OUTPUT
+
+          echo "merge_commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$MERGE_COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        env:
+          PR_COMMITS: ${{ steps.analyze.outputs.pr_commits }}
+          MERGE_COMMITS: ${{ steps.analyze.outputs.merge_commits }}
+        with:
+          script: |
+            const marker = '<!-- pr-bot -->';
+            const prNumber = context.payload.pull_request.number;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            const commits = parseInt(process.env.PR_COMMITS || "1");
+            const mergeCommits = (process.env.MERGE_COMMITS || "").trim();
+
+            const sections = [];
+
+            // Squash suggestion
+            if (commits >= 2) {
+              sections.push(
+                `### Squash Recommended\n\n` +
+                `This PR has **${commits} commits**.\n\n` +
+                `Please squash into a single commit for cleaner history.\n\n` +
+                `#### How to squash:\n` +
+                `\`\`\`bash\n` +
+                `git fetch origin\n` +
+                `git rebase -i origin/main\n` +
+                `# mark all commits except first as "squash"\n` +
+                `git push --force-with-lease\n` +
+                `\`\`\`\n`
+              );
+            }
+
+            // 🔄 Rebase suggestion
+            if (mergeCommits) {
+              sections.push(
+                `### 🔄 Rebase Recommended\n\n` +
+                `Merge commits detected:\n\n\`\`\`\n${mergeCommits}\n\`\`\`\n\n` +
+                `#### How to fix rebase issues:\n` +
+                `\`\`\`bash\n` +
+                `git fetch origin\n` +
+                `git rebase origin/main\n` +
+                `# resolve conflicts if any\n` +
+                `git push --force-with-lease\n` +
+                `\`\`\`\n`
+              );
+            }
+
+            // No issues → remove bot comment
+            if (sections.length === 0) {
+              if (existing) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                });
+              }
+              return;
+            }
+
+            // Final comment body
+            const body =
+              `${marker}\n## PR Quality Check\n\n` +
+              sections.join('\n\n') +
+              `\n\n---\n*Auto-updated on every push*`;
+
+            // Create or update comment
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }

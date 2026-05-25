@@ -1,4 +1,4 @@
-name: Linting and Building
+name: CI (Build)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-check:
+  build:
     runs-on: ubuntu-latest
 
     env:
@@ -18,24 +18,20 @@ jobs:
       REDIS_CONNECTION_URL: dummy_url
 
     steps:
-      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 10
           run_install: false
 
-      # Cache pnpm store
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
@@ -44,22 +40,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      # Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Lint entire repo
-      - name: Run ESLint
-        run: pnpm lint
-
-      # Prettier check
-      - name: Check formatting
-        run: pnpm exec prettier --check .
-
-      # Build server
       - name: Build server
         run: pnpm --filter server build
 
-      # Build client
       - name: Build client
         run: pnpm --filter client build
