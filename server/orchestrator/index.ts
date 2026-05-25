@@ -1,8 +1,12 @@
 import { AgentType, Prisma, PrismaClient, RunStatus, TaskStatus } from "@prisma/client";
+
 import { QueueEvents } from "bullmq";
+
 import { redis } from "../config/redis.config";
 import { logger } from "../config/logger.config";
+
 import { Edge, JsonInput, Node, WorkflowDefinition } from "../utils/types";
+
 import { JobQueue } from "../queues";
 import { runEmitter } from "../events/run.emitter";
 
@@ -22,19 +26,24 @@ export class Orchestrator {
 
   public start = async () => {
     for (const agentType of agentTypes) {
-      const queueEventInstance = new QueueEvents(agentType, { connection: redis });
+      const queueEventInstance = new QueueEvents(agentType, {
+        connection: redis,
+      });
 
       queueEventInstance.on("completed", ({ jobId }) => {
         logger.success(`Event completed ${jobId}`);
+
         this.onTaskCompleted(jobId, agentType);
       });
 
       queueEventInstance.on("failed", ({ jobId, failedReason }) => {
         logger.error(`Event failed ${jobId}, reason: ${failedReason}`);
+
         this.onTaskFailed(jobId, failedReason, agentType);
       });
 
       this.queueEventsInstances.push(queueEventInstance);
+
       logger.info(`Orchestrator listening on queue: ${agentType}`);
     }
   };
@@ -52,7 +61,6 @@ export class Orchestrator {
   };
 
   private buildDependencyMap = (nodes: Node[], edges: Edge[]): Map<string, string[]> => {
-    // nodeId -> array of nodeIds it depends on
     const dependencyMap = new Map<string, string[]>();
 
     for (const node of nodes) {
@@ -66,10 +74,88 @@ export class Orchestrator {
     return dependencyMap;
   };
 
+  private dispatchUnblockedTasks = async (
+    runId: string,
+    triggeringTaskOutput: unknown,
+  ) => {
+    const allTasks = await this.prisma.task.findMany({
+      where: { runId },
+    });
+
+    // Tasks considered resolved:
+    // - completed
+    // - failed but non-critical
+    const resolvedTaskIds = new Set(
+      allTasks
+        .filter(
+          (task) =>
+            task.status === TaskStatus.COMPLETED ||
+            (task.status === TaskStatus.FAILED && !task.critical),
+        )
+        .map((task) => task.id),
+    );
+
+    const unblockedTasks = allTasks.filter((task) => {
+      if (task.status !== TaskStatus.PENDING) {
+        return false;
+      }
+
+      const deps = task.dependsOn as string[];
+
+      return deps.every((depId) => resolvedTaskIds.has(depId));
+    });
+
+    if (!unblockedTasks.length) {
+      return;
+    }
+
+    const workflowRun = await this.prisma.workflowRun.findUnique({
+      where: { id: runId },
+      include: {
+        workflow: true,
+      },
+    });
+
+    if (!workflowRun) {
+      return;
+    }
+
+    const definition = workflowRun.workflow.definition as WorkflowDefinition;
+
+    for (const task of unblockedTasks) {
+      const node = definition.nodes.find((n) => n.name === task.name);
+
+      if (!node) {
+        continue;
+      }
+
+      const taskInput = triggeringTaskOutput ?? {};
+
+      await this.prisma.task.update({
+        where: { id: task.id },
+        data: {
+          input: taskInput as Prisma.InputJsonValue,
+        },
+      });
+
+      await JobQueue.addTaskToQueue(task.type, task.name, {
+        taskId: task.id,
+        input: taskInput,
+        config: node.config,
+      });
+
+      runEmitter.emit(`run:${runId}`, {
+        taskId: task.id,
+        status: TaskStatus.RUNNING,
+      });
+
+      logger.info(`Dispatched unblocked task: ${task.name} [${task.type}]`);
+    }
+  };
+
   public triggerRun = async (workflowId: string, input: JsonInput) => {
     logger.debug(`Run triggered for workflow: ${workflowId}`);
 
-    // Fetch the workflow definition from the database
     const workflow = await this.prisma.workflowDefinition.findUnique({
       where: {
         id: workflowId,
@@ -80,11 +166,10 @@ export class Orchestrator {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    // Parse the nodes and edges from the definition JSON
     const definition = workflow.definition as WorkflowDefinition;
+
     const { nodes, edges } = definition;
 
-    // Create a WorkflowRun row
     const workflowRun = await this.prisma.workflowRun.create({
       data: {
         workflowId,
@@ -93,13 +178,10 @@ export class Orchestrator {
       },
     });
 
-    // Build dependency map — nodeId -> array of nodeIds it depends on
     const dependencyMap = this.buildDependencyMap(nodes, edges);
 
-    // nodeId -> taskId — needed to translate node dependencies to task dependencies
     const nodeToTaskId = new Map<string, string>();
 
-    // Create all task rows first with empty dependsOn — we'll update them after
     for (const node of nodes) {
       const task = await this.prisma.task.create({
         data: {
@@ -113,42 +195,40 @@ export class Orchestrator {
         },
       });
 
-      // Map node ID to the real database task ID
       nodeToTaskId.set(node.id, task.id);
     }
 
-    // Now update each task's dependsOn with real task IDs
     for (const node of nodes) {
       const taskId = nodeToTaskId.get(node.id)!;
+
       const nodeDeps = dependencyMap.get(node.id) ?? [];
 
-      // Translate node IDs to task IDs
       const taskDeps = nodeDeps
         .map((nodeId) => nodeToTaskId.get(nodeId))
         .filter((id): id is string => !!id);
 
       await this.prisma.task.update({
         where: { id: taskId },
-        data: { dependsOn: taskDeps },
+        data: {
+          dependsOn: taskDeps,
+        },
       });
     }
 
-    // Find tasks with no dependencies — dispatch these immediately
     const firstTasks = nodes.filter(
       (node) => (dependencyMap.get(node.id) ?? []).length === 0,
     );
 
-    // Dispatch first tasks with the run input as their input
     for (const node of firstTasks) {
       const taskId = nodeToTaskId.get(node.id)!;
 
-      // Set input from workflow run input
       await this.prisma.task.update({
         where: { id: taskId },
-        data: { input: input as Prisma.InputJsonValue },
+        data: {
+          input: input as Prisma.InputJsonValue,
+        },
       });
 
-      // Push to the correct agent queue
       await JobQueue.addTaskToQueue(node.type, node.name, {
         taskId,
         input,
@@ -160,7 +240,6 @@ export class Orchestrator {
 
     logger.success(`Workflow run started: ${workflowRun.id}`);
 
-    // Return immediately — execution continues asynchronously
     return {
       runId: workflowRun.id,
       status: RunStatus.RUNNING,
@@ -174,31 +253,27 @@ export class Orchestrator {
   ): Promise<void> => {
     logger.debug(`'completed' event called for job: ${jobId}`);
 
-    // Get job from BullMQ to extract taskId
     const queue = JobQueue.getQueueByAgentType(agentType);
+
     const job = await queue.getJob(jobId);
 
     if (!job) {
       logger.error(`Job not found: ${jobId}`);
+
       return;
     }
 
     const { taskId } = job.data;
 
-    // Fetch the completed task
     const completedTask = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
 
     if (!completedTask) {
       logger.error(`Task not found: ${taskId}`);
+
       return;
     }
-
-    // Fetch all tasks for this run
-    const allTasks = await this.prisma.task.findMany({
-      where: { runId: completedTask.runId },
-    });
 
     runEmitter.emit(`run:${completedTask.runId}`, {
       taskId: completedTask.id,
@@ -206,71 +281,26 @@ export class Orchestrator {
       output: completedTask.output,
     });
 
-    // Find unblocked tasks
-    // A task is unblocked when all IDs in its dependsOn are COMPLETED
-    const completedTaskIds = new Set(
-      allTasks
-        .filter((task) => task.status === TaskStatus.COMPLETED)
-        .map((task) => task.id),
-    );
+    await this.dispatchUnblockedTasks(completedTask.runId, completedTask.output);
 
-    const unblockedTasks = allTasks.filter((task) => {
-      // Skip tasks that are already running, completed, or failed
-      if (task.status !== TaskStatus.PENDING) return false;
-
-      const deps = task.dependsOn as string[];
-
-      // All dependencies must be completed
-      return deps.every((depId) => completedTaskIds.has(depId));
+    const updatedTasks = await this.prisma.task.findMany({
+      where: {
+        runId: completedTask.runId,
+      },
     });
 
-    // Dispatch unblocked tasks
-    for (const task of unblockedTasks) {
-      // Fetch the workflow definition to get node config
-      const workflowRun = await this.prisma.workflowRun.findUnique({
-        where: { id: completedTask.runId },
-        include: { workflow: true },
-      });
-
-      if (!workflowRun) continue;
-
-      const definition = workflowRun.workflow.definition as WorkflowDefinition;
-      const node = definition.nodes.find((n) => n.name === task.name);
-
-      if (!node) continue;
-
-      // Set input from completed task output
-      const taskInput = completedTask.output ?? {};
-
-      await this.prisma.task.update({
-        where: { id: task.id },
-        data: { input: taskInput as Prisma.InputJsonValue },
-      });
-
-      // Dispatch to queue
-      await JobQueue.addTaskToQueue(task.type, task.name, {
-        taskId: task.id,
-        input: taskInput,
-        config: node.config,
-      });
-
-      // Emit task dispatched event for SSE
-      runEmitter.emit(`run:${completedTask.runId}`, {
-        taskId: task.id,
-        status: TaskStatus.RUNNING,
-      });
-      logger.info(`Dispatched unblocked task: ${task.name} [${task.type}]`);
-    }
-
-    // Check if all tasks are completed
-    const allCompleted = allTasks.every(
-      (task) => task.status === TaskStatus.COMPLETED || task.id === completedTask.id,
+    const allCompleted = updatedTasks.every(
+      (task) =>
+        task.status === TaskStatus.COMPLETED ||
+        task.status === TaskStatus.FAILED ||
+        task.status === TaskStatus.CANCELLED,
     );
 
     if (allCompleted) {
-      // The output of the run is the output of the last completed task
       await this.prisma.workflowRun.update({
-        where: { id: completedTask.runId },
+        where: {
+          id: completedTask.runId,
+        },
         data: {
           status: RunStatus.COMPLETED,
           output: completedTask.output as Prisma.InputJsonValue,
@@ -278,7 +308,6 @@ export class Orchestrator {
         },
       });
 
-      // Emit the event
       runEmitter.emit(`run:${completedTask.runId}`, {
         type: "RUN_COMPLETED",
         runId: completedTask.runId,
@@ -296,33 +325,36 @@ export class Orchestrator {
   ): Promise<void> => {
     logger.debug(`'failed' event called for job: ${jobId} with reason: ${reason}`);
 
-    // Get job from BullMQ to extract taskId
     const queue = JobQueue.getQueueByAgentType(agentType);
+
     const job = await queue.getJob(jobId);
 
     if (!job) {
       logger.error(`Job not found: ${jobId}`);
+
       return;
     }
 
     const { taskId } = job.data;
 
-    // Fetch the failed task
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
 
     if (!task) {
       logger.error(`Task not found: ${taskId}`);
+
       return;
     }
 
+    // CRITICAL TASK FAILURE
     if (task.critical) {
       logger.error(`Critical task failed: ${task.name} — failing entire run`);
 
-      // Fail the entire workflow run
       await this.prisma.workflowRun.update({
-        where: { id: task.runId },
+        where: {
+          id: task.runId,
+        },
         data: {
           status: RunStatus.FAILED,
           error: reason,
@@ -330,7 +362,6 @@ export class Orchestrator {
         },
       });
 
-      // Cancel all pending tasks in this run
       await this.prisma.task.updateMany({
         where: {
           runId: task.runId,
@@ -341,35 +372,63 @@ export class Orchestrator {
         },
       });
 
-      logger.error(`Workflow run failed: ${task.runId}`);
-    } else {
-      logger.warn(`Non-critical task failed, skipping: ${task.name}`);
-
-      // Fetch all tasks to check if run is complete
-      const allTasks = await this.prisma.task.findMany({
-        where: { runId: task.runId },
+      runEmitter.emit(`run:${task.runId}`, {
+        type: "RUN_FAILED",
+        runId: task.runId,
+        status: RunStatus.FAILED,
+        error: reason,
       });
 
-      // Run is complete if no tasks are pending or running
-      const isComplete = allTasks.every(
-        (t) =>
-          t.status === TaskStatus.COMPLETED ||
-          t.status === TaskStatus.FAILED ||
-          t.status === TaskStatus.CANCELLED ||
-          t.id === task.id,
+      logger.error(`Workflow run failed: ${task.runId}`);
+
+      return;
+    }
+
+    // NON-CRITICAL FAILURE
+    logger.debug(`Non-critical task failed, continuing workflow: ${task.name}`);
+
+    runEmitter.emit(`run:${task.runId}`, {
+      taskId: task.id,
+      status: TaskStatus.FAILED,
+      error: reason,
+    });
+
+    // Continue downstream execution
+    await this.dispatchUnblockedTasks(task.runId, {
+      error: reason,
+    });
+
+    const updatedTasks = await this.prisma.task.findMany({
+      where: { runId: task.runId },
+    });
+
+    const isComplete = updatedTasks.every(
+      (t) =>
+        t.status === TaskStatus.COMPLETED ||
+        t.status === TaskStatus.FAILED ||
+        t.status === TaskStatus.CANCELLED,
+    );
+
+    if (isComplete) {
+      await this.prisma.workflowRun.update({
+        where: {
+          id: task.runId,
+        },
+        data: {
+          status: RunStatus.COMPLETED,
+          completedAt: new Date(),
+        },
+      });
+
+      runEmitter.emit(`run:${task.runId}`, {
+        type: "RUN_COMPLETED",
+        runId: task.runId,
+        status: RunStatus.COMPLETED,
+      });
+
+      logger.success(
+        `Workflow run completed (with non-critical failures): ${task.runId}`,
       );
-
-      if (isComplete) {
-        await this.prisma.workflowRun.update({
-          where: { id: task.runId },
-          data: {
-            status: RunStatus.COMPLETED,
-            completedAt: new Date(),
-          },
-        });
-
-        logger.success(`Workflow run completed (with skipped tasks): ${task.runId}`);
-      }
     }
   };
 }

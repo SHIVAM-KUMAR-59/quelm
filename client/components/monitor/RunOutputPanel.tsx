@@ -19,8 +19,6 @@ const RunOutputPanel = ({ status, output, error, duration }: RunOutputPanelProps
   const isCompleted = status === "COMPLETED";
   const isFailed = status === "FAILED";
 
-  if (!isCompleted && !isFailed) return null;
-
   const formattedContent = useMemo(() => {
     if (isFailed) {
       return error || "Unknown execution error";
@@ -28,6 +26,9 @@ const RunOutputPanel = ({ status, output, error, duration }: RunOutputPanelProps
 
     return JSON.stringify(output, null, 2);
   }, [isFailed, output, error]);
+
+  // Early return AFTER hooks
+  if (!isCompleted && !isFailed) return null;
 
   const handleCopy = async () => {
     try {

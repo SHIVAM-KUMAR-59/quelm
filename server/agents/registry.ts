@@ -2,10 +2,12 @@ import { prisma } from "../config/prisma.config";
 import { logger } from "../config/logger.config";
 
 import { LLMAgent } from "./llm.agent";
+import { HttpAgent } from "./http.agent";
 
 const llmAgent = new LLMAgent("LLM_AGENT_1", 1, prisma);
+const httpAgent = new HttpAgent("HTTP_AGENT_1", 1, prisma);
 
-const agents = [llmAgent];
+const agents = [llmAgent, httpAgent];
 
 const startAgents = async (): Promise<void> => {
   logger.info("Starting agents...");

@@ -35,6 +35,8 @@ export type LLMConfig = {
 export type HTTPConfig = {
   url: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
+  headers?: Record<string, string>;
+  body?: Record<string, unknown>;
 };
 
 export type TransformConfig = {

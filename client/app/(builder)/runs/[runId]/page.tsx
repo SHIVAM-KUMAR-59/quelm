@@ -119,31 +119,44 @@ const RunMonitorPage = () => {
 
     const latestEvent = events[events.length - 1];
 
-    if (latestEvent.type === "RUN_COMPLETED") {
+    // Handle workflow-level events
+    if (latestEvent.type === "RUN_COMPLETED" || latestEvent.type === "RUN_FAILED") {
       refetch();
       return;
     }
 
     if (!latestEvent.taskId || !latestEvent.status) return;
 
-    // Find the task in the initial data to get the node name
+    // Find the task in the initial run data
     const task = run.tasks?.find((t: Task) => t.id === latestEvent.taskId);
+
     if (!task) return;
 
-    // Find the node in the definition by task name
+    // Find the corresponding node in workflow definition
     const definition = run.workflow?.definition as WorkflowDefinition;
+
     const node = definition?.nodes?.find((n) => n.name === task.name);
+
     if (!node) return;
 
-    // Use status FROM THE EVENT, not from run.tasks
+    // Map backend task status -> frontend node status
     const newStatus = STATUS_TO_NODE[latestEvent.status as TaskStatus] ?? "idle";
 
+    // Update node state live
     setNodes((nds) =>
       nds.map((n) =>
-        n.id === node.id ? { ...n, data: { ...n.data, status: newStatus } } : n,
+        n.id === node.id
+          ? {
+              ...n,
+              data: {
+                ...n.data,
+                status: newStatus,
+              },
+            }
+          : n,
       ),
     );
-  }, [events]);
+  }, [events, run, refetch, setNodes]);
 
   const onNodeClick = (_: React.MouseEvent, node: Node<AgentNodeData>) => {
     if (!run) return;
