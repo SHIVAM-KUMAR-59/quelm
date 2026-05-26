@@ -123,7 +123,7 @@ export class Orchestrator {
     const definition = workflowRun.workflow.definition as WorkflowDefinition;
 
     for (const task of unblockedTasks) {
-      const node = definition.nodes.find((n) => n.name === task.name);
+      const node = definition.nodes.find((n) => n.id === task.nodeId);
 
       if (!node) {
         continue;
@@ -192,6 +192,7 @@ export class Orchestrator {
           status: TaskStatus.PENDING,
           input: {},
           dependsOn: [],
+          nodeId: node.id,
         },
       });
 

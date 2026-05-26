@@ -52,6 +52,7 @@ model Task {
   maxAttempts Int        @default(3)
   dependsOn   Json       @default("[]")
   critical    Boolean   @default(true)
+  nodeId      String?
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime   @default(now())

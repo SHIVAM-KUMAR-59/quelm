@@ -24,6 +24,11 @@ const RunOutputPanel = ({ status, output, error, duration }: RunOutputPanelProps
       return error || "Unknown execution error";
     }
 
+    // If output has a text field, return it directly for readable rendering
+    if (output && typeof output.text === "string") {
+      return output.text;
+    }
+
     return JSON.stringify(output, null, 2);
   }, [isFailed, output, error]);
 

@@ -37,6 +37,9 @@ export class LLMAgent extends BaseAgent {
       typedConfig.promptTemplate,
       typedInput,
     );
+    logger.debug(`LLMAgent input received: ${JSON.stringify(input)}`);
+    logger.debug(`LLMAgent prompt before interpolation: ${typedConfig.promptTemplate}`);
+    logger.debug(`LLMAgent prompt after interpolation: ${interpolatedPrompt}`);
 
     logger.debug(`LLMAgent prompt: ${interpolatedPrompt}`);
 
