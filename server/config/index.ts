@@ -60,6 +60,13 @@ const config = {
   NODE_ENV: getString("NODE_ENV", "development"),
   IS_PRODUCTION: getString("NODE_ENV", "development") === "production",
   IS_DEVELOPMENT: getString("NODE_ENV", "development") === "development",
+
+  JWT: {
+    ACCESS_TOKEN: requireEnv("JWT_ACCESS_TOKEN"),
+    ACCESS_TIME: requireEnv("JWT_ACCESS_TIME"),
+    REFRESH_TOKEN: requireEnv("JWT_REFRESH_TOKEN"),
+    REFRESH_TIME: requireEnv("JWT_REFRESH_TIME"),
+  },
 } as const;
 
 export default config;

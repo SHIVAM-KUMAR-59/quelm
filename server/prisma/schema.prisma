@@ -7,6 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String?
+  avatar    String?
+  password  String? // null for OAuth users
+  provider  AuthProvider @default(LOCAL)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  workflows     WorkflowDefinition[]
+  runs          WorkflowRun[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
 // This is the blueprint. It doesn't change when you run a workflow, it's just the saved structure.
 model WorkflowDefinition {
   id          String   @id @default(cuid())
@@ -15,8 +44,10 @@ model WorkflowDefinition {
   definition  Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  userId      String
 
   runs WorkflowRun[]
+  user User          @relation(fields: [userId], references: [id])
 
   @@map("workflow_definitions")
 }
@@ -31,9 +62,11 @@ model WorkflowRun {
   startedAt   DateTime  @default(now())
   completedAt DateTime?
   error       String?
+  userId      String
 
   workflow WorkflowDefinition @relation(fields: [workflowId], references: [id])
   tasks    Task[]
+  user     User               @relation(fields: [userId], references: [id])
 
   @@map("workflow_runs")
 }
@@ -51,8 +84,8 @@ model Task {
   attempts    Int        @default(0)
   maxAttempts Int        @default(3)
   dependsOn   Json       @default("[]")
-  critical    Boolean   @default(true)
-  nodeId      String?
+  critical    Boolean    @default(true)
+  nodeId      String
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime   @default(now())
@@ -106,4 +139,10 @@ enum AgentType {
   EXTRACTION_AGENT
   NOTIFICATION_AGENT
   STORAGE_AGENT
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  GITHUB
 }
