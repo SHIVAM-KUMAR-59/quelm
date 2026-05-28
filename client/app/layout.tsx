@@ -4,6 +4,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Inter } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,7 +32,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <QueryProvider>
-          {children} <Toaster richColors position="top-right" />
+          <AuthProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

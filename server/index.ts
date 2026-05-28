@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { prisma } from "./config/prisma.config";
 import { logger } from "./config/logger.config";
@@ -8,6 +9,7 @@ import { AgentRegistry } from "./agents/registry";
 import { Orchestrator } from "./orchestrator";
 import { createApiRoutes } from "./api";
 import { errorHandlerMiddleware } from "./middleware/error.middleware";
+import passport from "passport";
 
 dotenv.config();
 
@@ -15,6 +17,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/health", (_, res) => {
   res.json({ status: "ok" });
@@ -28,6 +31,9 @@ const start = async (): Promise<void> => {
     // Verify database connection
     await prisma.$connect();
     logger.success("Database connected successfully");
+
+    // Initialize passport.js
+    passport.initialize();
 
     // Start agents
     await AgentRegistry.startAgents();
