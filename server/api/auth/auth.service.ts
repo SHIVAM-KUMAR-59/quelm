@@ -1,9 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthProvider, User } from "@prisma/client";
 import { AuthRepository } from "./auth.repository";
 import config from "../../config";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import {
+  AuthenticationError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../../utils/errors";
 
 type AuthResponse = {
   user: Omit<User, "password">;
@@ -18,7 +23,7 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(email);
 
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new ConflictError("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,13 +65,13 @@ export class AuthService {
     const storedToken = await this.authRepository.findRefreshToken(token);
 
     if (!storedToken) {
-      throw new Error("Invalid refresh token");
+      throw new ValidationError("Invalid refresh token");
     }
 
     if (storedToken.expiresAt < new Date()) {
       await this.authRepository.deleteRefreshToken(token);
 
-      throw new Error("Refresh token expired");
+      throw new AuthenticationError("Refresh token expired");
     }
 
     try {
@@ -80,7 +85,7 @@ export class AuthService {
         accessToken,
       };
     } catch {
-      throw new Error("Invalid refresh token");
+      throw new AuthenticationError("Invalid refresh token");
     }
   }
 
@@ -92,7 +97,7 @@ export class AuthService {
     const user = await this.authRepository.findById(id);
 
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundError("User", id);
     }
 
     const { password: _password, ...safeUser } = user;
@@ -106,16 +111,7 @@ export class AuthService {
     provider: AuthProvider,
     avatar?: string,
   ): Promise<AuthResponse> {
-    let user = await this.authRepository.findByEmail(email);
-
-    if (!user) {
-      user = await this.authRepository.createUser({
-        email,
-        name,
-        avatar,
-        provider,
-      });
-    }
+    const user = await this.authRepository.upsertOAuthUser(email, name, provider, avatar);
 
     const accessToken = this.generateAccessToken(user.id);
 

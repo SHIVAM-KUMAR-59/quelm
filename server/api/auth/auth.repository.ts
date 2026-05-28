@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, RefreshToken, User } from "@prisma/client";
+import { AuthProvider, Prisma, PrismaClient, RefreshToken, User } from "@prisma/client";
 
 export class AuthRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -54,6 +54,19 @@ export class AuthRepository {
       where: {
         userId,
       },
+    });
+  }
+
+  async upsertOAuthUser(
+    email: string,
+    name: string,
+    provider: AuthProvider,
+    avatar?: string,
+  ): Promise<User> {
+    return await this.prisma.user.upsert({
+      where: { email },
+      create: { email, name, avatar, provider },
+      update: { name, avatar },
     });
   }
 }

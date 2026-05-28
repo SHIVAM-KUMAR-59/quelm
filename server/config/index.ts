@@ -60,12 +60,25 @@ const config = {
   NODE_ENV: getString("NODE_ENV", "development"),
   IS_PRODUCTION: getString("NODE_ENV", "development") === "production",
   IS_DEVELOPMENT: getString("NODE_ENV", "development") === "development",
+  CLIENT_URL: getString("CLIENT_URL", "http://localhost:3000"),
 
   JWT: {
     ACCESS_TOKEN: requireEnv("JWT_ACCESS_TOKEN"),
     ACCESS_TIME: requireEnv("JWT_ACCESS_TIME"),
     REFRESH_TOKEN: requireEnv("JWT_REFRESH_TOKEN"),
     REFRESH_TIME: requireEnv("JWT_REFRESH_TIME"),
+  },
+
+  GITHUB_CREDENTIALS: {
+    CLIENT_ID: requireEnv("GITHUB_CLIENT_ID"),
+    CLIENT_SECRET: requireEnv("GITHUB_CLIENT_SECRET"),
+    CALLBACK_URL: requireEnv("GITHUB_CALLBACK_URL"),
+  },
+
+  GOOGLE_CREDENTIALS: {
+    CLIENT_ID: requireEnv("GOOGLE_CLIENT_ID"),
+    CLIENT_SECRET: requireEnv("GOOGLE_CLIENT_SECRET"),
+    CALLBACK_URL: requireEnv("GOOGLE_CALLBACK_URL"),
   },
 } as const;
 
