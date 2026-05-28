@@ -1,7 +1,6 @@
-// app/(auth)/layout.tsx
-
 import { Card } from "@/components/ui/card";
 import Icon from "@/components/ui/Icon";
+import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 import React from "react";
 
@@ -12,6 +11,7 @@ export default function AuthLayout({
 }>) {
   return (
     <main className="min-h-screen bg-background">
+      <Toaster richColors position="top-right" />
       <header className="border-b border-border">
         <nav className="flex items-center justify-between w-full max-w-7xl mx-auto px-6 py-4">
           <Link href="/" className="flex items-center gap-2">

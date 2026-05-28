@@ -32,8 +32,8 @@ export class ConflictError extends ApiError {
 
 export class AuthenticationError extends ApiError {
   constructor(message: string) {
-    super(message, 401, "AUTHENTICATION_ERROR");
-    this.name = "AuthenticationError";
+    super(message, 401, "UNAUTHORIZED");
+    this.name = "Unauthorized";
   }
 }
 

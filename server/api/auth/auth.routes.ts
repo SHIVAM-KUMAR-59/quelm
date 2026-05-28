@@ -5,6 +5,7 @@ import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import passport from "passport";
 import config from "../../config";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 export const createAuthRouter = (prisma: PrismaClient) => {
   const router = Router();
@@ -45,7 +46,8 @@ export const createAuthRouter = (prisma: PrismaClient) => {
   );
   router.post("/logout", controller.logout);
   router.post("/token/refresh", controller.refresh);
-  router.get("/me", controller.me);
+
+  router.get("/me", authMiddleware, controller.me);
 
   return router;
 };

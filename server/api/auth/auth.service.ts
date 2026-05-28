@@ -75,7 +75,7 @@ export class AuthService {
     }
 
     try {
-      const payload = jwt.verify(token, config.JWT.REFRESH_TOKEN) as {
+      const payload = jwt.verify(token, config.JWT.REFRESH_TOKEN_SECRET) as {
         userId: string;
       };
 
@@ -127,14 +127,14 @@ export class AuthService {
   }
 
   private generateAccessToken(userId: string): string {
-    return jwt.sign({ userId }, config.JWT.ACCESS_TOKEN as Secret, {
-      expiresIn: config.JWT.ACCESS_TIME as SignOptions["expiresIn"],
+    return jwt.sign({ userId }, config.JWT.ACCESS_TOKEN_SECRET as Secret, {
+      expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_TIME as SignOptions["expiresIn"],
     });
   }
 
   private async generateRefreshToken(userId: string): Promise<string> {
-    const token = jwt.sign({ userId }, config.JWT.REFRESH_TOKEN as Secret, {
-      expiresIn: config.JWT.REFRESH_TIME as SignOptions["expiresIn"],
+    const token = jwt.sign({ userId }, config.JWT.REFRESH_TOKEN_SECRET as Secret, {
+      expiresIn: config.JWT.REFRESH_TOKEN_EXPIRE_TIME as SignOptions["expiresIn"],
     });
 
     const decoded = jwt.decode(token) as jwt.JwtPayload;

@@ -5,8 +5,21 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const LoginPage = () => {
+  const searchParams = useSearchParams();
+
+  const isUnauthorizedError = searchParams.get("error") === "unauthorized";
+
+  useEffect(() => {
+    if (isUnauthorizedError) {
+      toast.error("Your session expired. Please log in again.");
+    }
+  }, [isUnauthorizedError]);
+
   return (
     <section className="w-full max-w-md space-y-6">
       <div className="space-y-2 text-center">
