@@ -8,20 +8,23 @@ export const api = axios.create({
 });
 
 api.interceptors.response.use(
-  (response) => response.data,
-  async (error: AxiosError<{ message?: string }>) => {
+  (response) => response,
+  async (error) => {
     const status = error.response?.status;
-    if (status === 401) {
+    const requestUrl = error.config?.url || "";
+
+    const isAuthRoute =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.includes("/auth/token/refresh");
+
+    if (status === 401 && !isAuthRoute) {
       window.location.href = "/auth/login?error=unauthorized";
     }
 
-    const message =
-      error.response?.data?.message || error.message || "Something went wrong";
-
-    return Promise.reject(new Error(message));
+    return Promise.reject(error);
   },
 );
-
 export const getErrorMessage = (err: unknown): string => {
   if (err instanceof AxiosError) {
     return err.response?.data?.message ?? err.message;

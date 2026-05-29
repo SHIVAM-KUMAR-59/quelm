@@ -20,88 +20,93 @@ export interface AuthUser {
 
 interface AuthState {
   accessToken: string | null;
-  refreshToken: string | null;
   user: AuthUser | null;
 }
 
 interface AuthContextValue extends AuthState {
   tokenRef: React.MutableRefObject<string | null>;
-  setAuth: (accessToken: string, refreshToken: string, user: AuthUser) => void;
-  logout: () => void;
+  setAuth: (accessToken: string, user: AuthUser) => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = "quelm-auth";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     accessToken: null,
-    refreshToken: null,
     user: null,
   });
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   const tokenRef = useRef<string | null>(null);
 
-  // Restore auth state on refresh
+  const hasRestored = useRef(false);
+
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    if (hasRestored.current) return;
 
-    if (!stored) {
-      setLoading(false);
-      return;
-    }
+    hasRestored.current = true;
 
-    try {
-      const parsed: AuthState = JSON.parse(stored);
+    const restoreSession = async () => {
+      try {
+        const refreshResponse = await api.post("/auth/token/refresh");
 
-      tokenRef.current = parsed.accessToken;
+        const accessToken = refreshResponse.data.accessToken;
 
-      if (parsed.accessToken) {
-        api.defaults.headers.common["Authorization"] = `Bearer ${parsed.accessToken}`;
+        tokenRef.current = accessToken;
+
+        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+        const meResponse = await api.get("/auth/me");
+
+        setAuthState({
+          accessToken,
+          user: meResponse.data.user,
+        });
+      } catch {
+        tokenRef.current = null;
+
+        delete api.defaults.headers.common["Authorization"];
+
+        setAuthState({
+          accessToken: null,
+          user: null,
+        });
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setAuthState(parsed);
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setLoading(false);
-    }
+    restoreSession();
   }, []);
 
-  const setAuth = useCallback(
-    (accessToken: string, refreshToken: string, user: AuthUser) => {
-      const newState: AuthState = {
-        accessToken,
-        refreshToken,
-        user,
-      };
+  const setAuth = useCallback((accessToken: string, user: AuthUser) => {
+    tokenRef.current = accessToken;
 
-      tokenRef.current = accessToken;
+    api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+    setAuthState({
+      accessToken,
+      user,
+    });
+  }, []);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+  const logout = useCallback(async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // ignore logout errors
+    }
 
-      setAuthState(newState);
-    },
-    [],
-  );
-
-  const logout = useCallback(() => {
     tokenRef.current = null;
 
     delete api.defaults.headers.common["Authorization"];
 
-    localStorage.removeItem(STORAGE_KEY);
-
     setAuthState({
       accessToken: null,
-      refreshToken: null,
       user: null,
     });
   }, []);

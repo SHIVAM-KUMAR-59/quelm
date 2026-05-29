@@ -5,8 +5,38 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useState } from "react";
 
 const SignupPage = () => {
+  const [registerFormData, setRegisterFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [formSubmitting, setFormSubmitting] = useState({
+    google: false,
+    github: false,
+    form: false,
+  });
+
+  const isSubmitting =
+    formSubmitting.form || formSubmitting.github || formSubmitting.google;
+  console.log(isSubmitting);
+
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormSubmitting((prev) => ({ ...prev, form: true }));
+    console.log(registerFormData);
+  };
+
+  const handleGoogleSubmit = async () => {
+    setFormSubmitting((prev) => ({ ...prev, google: true }));
+  };
+  const handleGithubSubmit = async () => {
+    setFormSubmitting((prev) => ({ ...prev, github: true }));
+  };
+
   return (
     <section className="w-full max-w-md space-y-6">
       <div className="space-y-2 text-center">
@@ -19,16 +49,28 @@ const SignupPage = () => {
 
       {/* OAuth Buttons */}
       <div className="space-y-3">
-        <Button variant="outline" className="w-full h-11 flex items-center gap-2" asChild>
-          <a href="/auth/google/callback">
+        <Button
+          disabled={isSubmitting}
+          variant="outline"
+          className="w-full h-11 flex items-center gap-2 disabled:cursor-not-allowed"
+          asChild
+          onClick={handleGoogleSubmit}
+        >
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`}>
             {/* Google SVG */}
             <Image src={"/google.svg"} alt="google-icon" height={18} width={18} />
             Continue with Google
           </a>
         </Button>
 
-        <Button variant="outline" className="w-full h-11 flex items-center gap-2" asChild>
-          <a href="/auth/github/callback">
+        <Button
+          disabled={isSubmitting}
+          variant="outline"
+          className="w-full h-11 flex items-center gap-2 disabled:cursor-not-allowed"
+          asChild
+          onClick={handleGithubSubmit}
+        >
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/github`}>
             {/* GitHub SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -57,13 +99,21 @@ const SignupPage = () => {
       </div>
 
       {/* Signup Form */}
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={onFormSubmit}>
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="text-sm font-medium">
             Full Name
           </label>
 
-          <Input id="name" type="text" placeholder="Shivam Kumar" className="h-11" />
+          <Input
+            id="name"
+            type="text"
+            placeholder="John Doe"
+            className="h-11"
+            onChange={(event) =>
+              setRegisterFormData((prev) => ({ ...prev, name: event.target.value }))
+            }
+          />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -74,8 +124,11 @@ const SignupPage = () => {
           <Input
             id="email"
             type="email"
-            placeholder="shivam@example.com"
+            placeholder="johndoe@example.com"
             className="h-11"
+            onChange={(event) =>
+              setRegisterFormData((prev) => ({ ...prev, email: event.target.value }))
+            }
           />
         </div>
 
@@ -89,17 +142,24 @@ const SignupPage = () => {
             type="password"
             placeholder="Create a strong password"
             className="h-11"
+            onChange={(event) =>
+              setRegisterFormData((prev) => ({ ...prev, password: event.target.value }))
+            }
           />
         </div>
 
-        <Button className="w-full h-11 transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200 cursor-pointer">
+        <Button
+          disabled={isSubmitting}
+          type="submit"
+          className="w-full h-11 transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200 cursor-pointer disabled:cursor-not-allowed"
+        >
           Create Account
         </Button>
       </form>
 
       <p className="text-sm text-center text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-primary hover:underline">
+        <Link href="/auth/login" className="text-primary hover:underline">
           Login
         </Link>
       </p>

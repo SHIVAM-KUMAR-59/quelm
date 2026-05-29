@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 const LoginPage = () => {
   const searchParams = useSearchParams();
@@ -18,7 +19,49 @@ const LoginPage = () => {
     if (isUnauthorizedError) {
       toast.error("Your session expired. Please log in again.");
     }
-  }, [isUnauthorizedError]);
+  }, []);
+
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [formSubmitting, setFormSubmitting] = useState({
+    google: false,
+    github: false,
+    form: false,
+  });
+
+  const isSubmitting =
+    formSubmitting.form || formSubmitting.github || formSubmitting.google;
+  console.log(isSubmitting);
+
+  const onFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setFormSubmitting((prev) => ({
+      ...prev,
+      form: true,
+    }));
+
+    try {
+      const response = await api.post("/auth/login", loginFormData);
+
+      console.log(response);
+
+      // Example:
+      // setAuth(response.accessToken, response.user);
+      // router.push("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Failed to login");
+    } finally {
+      setFormSubmitting((prev) => ({
+        ...prev,
+        form: false,
+      }));
+    }
+  };
 
   return (
     <section className="w-full max-w-md space-y-6">
@@ -31,16 +74,28 @@ const LoginPage = () => {
       </div>
 
       <div className="space-y-3">
-        <Button variant="outline" className="w-full h-11 flex items-center gap-2" asChild>
-          <a href="/auth/google/callback">
+        <Button
+          disabled={isSubmitting}
+          variant="outline"
+          className="w-full h-11 flex items-center gap-2 disabled:cursor-not-allowed"
+          asChild
+          // onClick={handleGoogleSubmit}
+        >
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`}>
             {/* Google SVG */}
             <Image src={"/google.svg"} alt="google-icon" height={18} width={18} />
             Continue with Google
           </a>
         </Button>
 
-        <Button variant="outline" className="w-full h-11 flex items-center gap-2" asChild>
-          <a href="/auth/github/callback">
+        <Button
+          disabled={isSubmitting}
+          variant="outline"
+          className="w-full h-11 flex items-center gap-2 disabled:cursor-not-allowed"
+          asChild
+          // onClick={handleGithubSubmit}
+        >
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/api/auth/github`}>
             {/* GitHub SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +122,7 @@ const LoginPage = () => {
         </div>
       </div>
 
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={onFormSubmit}>
         <div className="flex flex-col gap-2">
           <label htmlFor="email" className="text-sm font-medium">
             Email
@@ -76,8 +131,11 @@ const LoginPage = () => {
           <Input
             id="email"
             type="email"
-            placeholder="shivam@example.com"
+            placeholder="johndoe@example.com"
             className="h-11"
+            onChange={(event) =>
+              setLoginFormData((prev) => ({ ...prev, email: event.target.value }))
+            }
           />
         </div>
 
@@ -95,17 +153,29 @@ const LoginPage = () => {
             </Link>
           </div>
 
-          <Input id="password" type="password" placeholder="••••••••" className="h-11" />
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            className="h-11"
+            onChange={(event) =>
+              setLoginFormData((prev) => ({ ...prev, password: event.target.value }))
+            }
+          />
         </div>
 
-        <Button className="w-full h-11 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200">
+        <Button
+          disabled={isSubmitting}
+          type="submit"
+          className="w-full h-11 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200 disabled:cursor-not-allowed"
+        >
           Login
         </Button>
       </form>
 
       <p className="text-sm text-center text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-primary hover:underline">
+        <Link href="/auth/signup" className="text-primary hover:underline">
           Create one
         </Link>
       </p>

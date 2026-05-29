@@ -13,10 +13,9 @@ const AuthCallbackPage = () => {
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
-    const refreshToken = searchParams.get("refreshToken");
     const userParam = searchParams.get("user");
 
-    if (!accessToken || !refreshToken || !userParam) {
+    if (!accessToken || !userParam) {
       router.replace("/auth/login");
       return;
     }
@@ -24,7 +23,7 @@ const AuthCallbackPage = () => {
     try {
       const user = JSON.parse(decodeURIComponent(userParam));
 
-      setAuth(accessToken, refreshToken, user);
+      setAuth(accessToken, user);
 
       router.replace("/dashboard");
     } catch {

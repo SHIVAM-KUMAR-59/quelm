@@ -76,7 +76,11 @@ export class AuthController {
       res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_OPTIONS);
 
       // Redirect to frontend with access token in query param
-      res.redirect(`${config.CLIENT_URL}/auth/callback?token=${accessToken}`);
+      res.redirect(
+        `${config.CLIENT_URL}/auth/callback?accessToken=${encodeURIComponent(
+          accessToken,
+        )}user=${encodeURIComponent(JSON.stringify(req.user))}`,
+      );
     } catch (error) {
       next(error);
     }
@@ -92,7 +96,11 @@ export class AuthController {
       res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_OPTIONS);
 
       // Redirect to frontend with access token in query param
-      res.redirect(`${config.CLIENT_URL}/auth/callback?token=${accessToken}`);
+      res.redirect(
+        `${config.CLIENT_URL}/auth/callback?accessToken=${encodeURIComponent(
+          accessToken,
+        )}&user=${encodeURIComponent(JSON.stringify(req.user))}`,
+      );
     } catch (error) {
       next(error);
     }
