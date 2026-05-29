@@ -118,7 +118,7 @@ export default function LandingPage() {
             </a>
 
             <a
-              href="#agents"
+              href="/agents"
               className="text-sm text-zinc-400 transition-colors hover:text-white"
             >
               Agents
