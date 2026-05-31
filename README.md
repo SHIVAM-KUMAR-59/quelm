@@ -455,6 +455,10 @@ The frontend opens an SSE connection to `/api/runs/:id/stream`. As each task com
 
 Every task has a configurable `maxAttempts` (default 3). BullMQ retries failed jobs with exponential backoff. If a task marked `critical: true` exhausts all attempts, the entire workflow run is marked `FAILED` and all pending tasks are cancelled. Non-critical task failures are logged and skipped — the run continues with remaining tasks.
 
+### Stale Run Timeout
+
+Runs that have been in `RUNNING` status for more than 10 minutes with no task activity (no task has reached `RUNNING` or `COMPLETED`) are automatically marked as `FAILED` and all pending tasks are cancelled. A background job runs every 5 minutes to detect and clean up stale runs. This covers edge cases where invalid configuration, type mismatches, or worker unavailability prevent any task from progressing.
+
 ---
 
 ## Deployment
