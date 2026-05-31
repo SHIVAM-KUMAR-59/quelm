@@ -242,6 +242,10 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/agent_platform
 # Redis
 REDIS_URL=redis://localhost:6379
 
+# JWT
+JWT_SECRET=your_jwt_secret_here_change_in_production
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_here_change_in_production
+
 # Groq
 GROQ_API_KEY=your_groq_api_key_here
 ```
@@ -316,6 +320,17 @@ Errors follow this shape:
   "errorCode": "NOT_FOUND"
 }
 ```
+
+### Authentication
+
+All endpoints except `/api/auth/register`, `/api/auth/login`, and `/api/auth/refresh` require a valid JWT access token sent via the `Authorization: Bearer <token>` header. Refresh tokens are stored in an httpOnly cookie.
+
+| Method | Endpoint                | Description                          |
+| ------ | ----------------------- | ------------------------------------ |
+| `POST` | `/api/auth/register`    | Create a new user account            |
+| `POST` | `/api/auth/login`       | Login — returns access token + sets refresh cookie |
+| `POST` | `/api/auth/refresh`     | Exchange refresh token for a new access token |
+| `POST` | `/api/auth/logout`      | Clear refresh cookie                 |
 
 ### Workflows
 
@@ -481,7 +496,7 @@ Every task has a configurable `maxAttempts` (default 3). BullMQ retries failed j
 
 ## Roadmap
 
-- [ ] User authentication (JWT + refresh tokens)
+- [x] User authentication (JWT + refresh tokens)
 - [ ] HTTP Agent implementation
 - [ ] Transform Agent implementation
 - [ ] Node name editing in the workflow builder

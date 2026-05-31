@@ -3,8 +3,9 @@ import { PrismaClient, WorkflowRun } from "@prisma/client";
 export class WorkflowRunRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(): Promise<WorkflowRun[]> {
+  async findAllByUser(userId: string): Promise<WorkflowRun[]> {
     return await this.prisma.workflowRun.findMany({
+      where: { userId },
       include: {
         tasks: true,
         workflow: true,
@@ -24,10 +25,11 @@ export class WorkflowRunRepository {
     });
   }
 
-  async findByWorkflowId(workflowId: string): Promise<WorkflowRun[]> {
+  async findByWorkflowId(workflowId: string, userId: string): Promise<WorkflowRun[]> {
     return await this.prisma.workflowRun.findMany({
       where: {
         workflowId,
+        userId,
       },
       include: {
         tasks: true,

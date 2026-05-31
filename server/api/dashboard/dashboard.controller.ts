@@ -6,7 +6,7 @@ export class DashboardController {
 
   getStats: Controller = async (req, res, next) => {
     try {
-      const stats = await this.dashboardService.getStats();
+      const stats = await this.dashboardService.getStats(req.userId!);
       res.status(200).json({
         success: true,
         message: "Dashboard stats fetched successfully",
@@ -19,7 +19,7 @@ export class DashboardController {
 
   getRecentRuns: Controller = async (req, res, next) => {
     try {
-      const runs = await this.dashboardService.getRecentRuns();
+      const runs = await this.dashboardService.getRecentRuns(req.userId!);
       res.status(200).json({
         success: true,
         message: "Recent runs fetched successfully",

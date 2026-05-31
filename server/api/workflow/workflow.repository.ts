@@ -3,8 +3,10 @@ import { Prisma, PrismaClient, WorkflowDefinition } from "@prisma/client";
 export class WorkflowRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(): Promise<WorkflowDefinition[]> {
-    return await this.prisma.workflowDefinition.findMany();
+  async findAllByUser(userId: string): Promise<WorkflowDefinition[]> {
+    return await this.prisma.workflowDefinition.findMany({
+      where: { userId },
+    });
   }
 
   async findById(id: string): Promise<WorkflowDefinition | null> {
@@ -15,9 +17,17 @@ export class WorkflowRepository {
     });
   }
 
-  async create(data: Prisma.WorkflowDefinitionCreateInput): Promise<WorkflowDefinition> {
+  async create(
+    data: { name: string; description?: string; definition: Prisma.InputJsonValue },
+    userId: string,
+  ): Promise<WorkflowDefinition> {
     return await this.prisma.workflowDefinition.create({
-      data: data,
+      data: {
+        name: data.name,
+        description: data.description,
+        definition: data.definition,
+        userId,
+      },
     });
   }
 

@@ -24,7 +24,7 @@ export class WorkflowController {
 
   getAllWorkflows: Controller = async (req, res, next) => {
     try {
-      const workflows = await this.workflowService.getAllWorkflows();
+      const workflows = await this.workflowService.getAllWorkflows(req.userId!);
       res.status(200).json({
         message: "Workflows fetched successfully",
         success: true,
@@ -38,7 +38,7 @@ export class WorkflowController {
   getWorkflowById: ParamsController<params> = async (req, res, next) => {
     try {
       const id = req.params.id;
-      const workflow = await this.workflowService.getWorkflowById(id);
+      const workflow = await this.workflowService.getWorkflowById(id, req.userId!);
       res.status(200).json({
         message: "Workflow fetched successfully",
         success: true,
@@ -52,7 +52,7 @@ export class WorkflowController {
   createWorkflow: BodyController<body> = async (req, res, next) => {
     try {
       const { data } = req.body;
-      const workflow = await this.workflowService.createWorkflow(data);
+      const workflow = await this.workflowService.createWorkflow(data, req.userId!);
       res.status(201).json({
         message: "Workflow created successfully",
         success: true,
@@ -67,7 +67,7 @@ export class WorkflowController {
     try {
       const id = req.params.id;
       const { data } = req.body;
-      const workflow = await this.workflowService.triggerRun(id, data.input);
+      const workflow = await this.workflowService.triggerRun(id, data.input, req.userId!);
       res.status(200).json({
         message: "Workflow triggered successfully",
         success: true,

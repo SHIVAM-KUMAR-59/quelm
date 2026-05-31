@@ -3,7 +3,6 @@ import { Router } from "express";
 import { WorkflowRunController } from "./run.controller";
 import { WorkflowRunService } from "./run.service";
 import { WorkflowRunRepository } from "./run.repository";
-import { handleWorkflowRunServerSentEvents } from "./run.sse";
 
 export const createWorkflowRunRouter = (prisma: PrismaClient) => {
   const router = Router();
@@ -15,7 +14,6 @@ export const createWorkflowRunRouter = (prisma: PrismaClient) => {
 
   // mount routes
   router.get("/", controller.getAllRuns);
-  router.get("/:runId/stream", handleWorkflowRunServerSentEvents);
   router.get("/:id", controller.getRunById);
   router.get("/workflow/:workflowId", controller.getRunByWorkflowId);
 

@@ -3,12 +3,12 @@ import { PrismaClient, AgentStatus, RunStatus } from "@prisma/client";
 export class DashboardRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async getStats() {
+  async getStats(userId: string) {
     const [totalWorkflows, totalRuns, completedRuns, agentsOnline] = await Promise.all([
-      this.prisma.workflowDefinition.count(),
-      this.prisma.workflowRun.count(),
+      this.prisma.workflowDefinition.count({ where: { userId } }),
+      this.prisma.workflowRun.count({ where: { userId } }),
       this.prisma.workflowRun.count({
-        where: { status: RunStatus.COMPLETED },
+        where: { userId, status: RunStatus.COMPLETED },
       }),
       this.prisma.agent.count({
         where: { status: AgentStatus.ONLINE },
@@ -23,8 +23,9 @@ export class DashboardRepository {
     };
   }
 
-  async getRecentRuns() {
+  async getRecentRuns(userId: string) {
     return await this.prisma.workflowRun.findMany({
+      where: { userId },
       take: 5,
       orderBy: { startedAt: "desc" },
       select: {

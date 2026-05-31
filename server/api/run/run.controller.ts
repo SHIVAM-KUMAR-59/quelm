@@ -14,7 +14,7 @@ export class WorkflowRunController {
 
   getAllRuns: Controller = async (req, res, next) => {
     try {
-      const runs = await this.workflowRunService.getAllRuns();
+      const runs = await this.workflowRunService.getAllRuns(req.userId!);
       res.status(200).json({
         message: "Workflow runs fetched successfully",
         success: true,
@@ -28,7 +28,7 @@ export class WorkflowRunController {
   getRunById: ParamsController<params> = async (req, res, next) => {
     try {
       const id = req.params.id;
-      const run = await this.workflowRunService.getRunById(id);
+      const run = await this.workflowRunService.getRunById(id, req.userId!);
       res.status(200).json({
         message: "Workflow run fetched successfully",
         success: true,
@@ -42,7 +42,7 @@ export class WorkflowRunController {
   getRunByWorkflowId: ParamsController<workflowIdParams> = async (req, res, next) => {
     try {
       const id = req.params.workflowId;
-      const run = await this.workflowRunService.getRunsByWorkflowId(id);
+      const run = await this.workflowRunService.getRunsByWorkflowId(id, req.userId!);
       res.status(200).json({
         message: "Workflow run fetched successfully",
         success: true,

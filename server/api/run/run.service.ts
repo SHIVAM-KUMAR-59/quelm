@@ -4,11 +4,11 @@ import { WorkflowRunRepository } from "./run.repository";
 export class WorkflowRunService {
   constructor(private readonly workflowRunRepository: WorkflowRunRepository) {}
 
-  async getAllRuns() {
-    return await this.workflowRunRepository.findAll();
+  async getAllRuns(userId: string) {
+    return await this.workflowRunRepository.findAllByUser(userId);
   }
 
-  async getRunById(id: string) {
+  async getRunById(id: string, userId: string) {
     if (!id) {
       throw new ValidationError("Workflow run ID is required");
     }
@@ -18,13 +18,17 @@ export class WorkflowRunService {
       throw new NotFoundError("Workflow run", id);
     }
 
+    if (workflowRun.userId && workflowRun.userId !== userId) {
+      throw new NotFoundError("Workflow run", id);
+    }
+
     return workflowRun;
   }
 
-  async getRunsByWorkflowId(id: string) {
+  async getRunsByWorkflowId(id: string, userId: string) {
     if (!id) {
       throw new ValidationError("Workflow ID is required");
     }
-    return this.workflowRunRepository.findByWorkflowId(id);
+    return this.workflowRunRepository.findByWorkflowId(id, userId);
   }
 }

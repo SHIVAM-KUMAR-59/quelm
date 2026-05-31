@@ -3,9 +3,9 @@ import { DashboardRepository } from "./dashboard.repository";
 export class DashboardService {
   constructor(private readonly dashboardRepository: DashboardRepository) {}
 
-  async getStats() {
+  async getStats(userId: string) {
     const { totalWorkflows, totalRuns, completedRuns, agentsOnline } =
-      await this.dashboardRepository.getStats();
+      await this.dashboardRepository.getStats(userId);
 
     const successRate =
       totalRuns === 0 ? 0 : Math.round((completedRuns / totalRuns) * 100 * 10) / 10;
@@ -18,8 +18,8 @@ export class DashboardService {
     };
   }
 
-  async getRecentRuns() {
-    const runs = await this.dashboardRepository.getRecentRuns();
+  async getRecentRuns(userId: string) {
+    const runs = await this.dashboardRepository.getRecentRuns(userId);
 
     return runs.map((run) => ({
       id: run.id,

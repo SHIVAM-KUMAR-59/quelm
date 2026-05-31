@@ -153,7 +153,7 @@ export class Orchestrator {
     }
   };
 
-  public triggerRun = async (workflowId: string, input: JsonInput) => {
+  public triggerRun = async (workflowId: string, input: JsonInput, userId?: string) => {
     logger.debug(`Run triggered for workflow: ${workflowId}`);
 
     const workflow = await this.prisma.workflowDefinition.findUnique({
@@ -173,6 +173,7 @@ export class Orchestrator {
     const workflowRun = await this.prisma.workflowRun.create({
       data: {
         workflowId,
+        userId,
         input: input as Prisma.InputJsonValue,
         status: RunStatus.RUNNING,
       },
