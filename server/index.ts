@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { prisma } from "./config/prisma.config";
 import { logger } from "./config/logger.config";
+import config from "./config";
 import { JobQueue } from "./queues";
 import { AgentRegistry } from "./agents/registry";
 import { Orchestrator } from "./orchestrator";
@@ -13,7 +14,23 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  config.CLIENT_URL,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  }),
+);
 app.use(express.json());
 
 app.get("/health", (_, res) => {

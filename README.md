@@ -242,6 +242,9 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/agent_platform
 # Redis
 REDIS_URL=redis://localhost:6379
 
+# Client URL (deployed frontend, for CORS)
+CLIENT_URL=http://localhost:3000
+
 # Groq
 GROQ_API_KEY=your_groq_api_key_here
 ```
