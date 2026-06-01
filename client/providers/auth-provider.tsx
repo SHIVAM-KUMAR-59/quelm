@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { api, setAccessToken } from "@/lib/api";
+import { api } from "@/lib/api";
 
 type User = {
   id: string;
@@ -19,6 +19,16 @@ type AuthContext = {
 
 const AuthContext = createContext<AuthContext | null>(null);
 
+const setToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    sessionStorage.setItem("accessToken", token);
+  } else {
+    delete api.defaults.headers.common.Authorization;
+    sessionStorage.removeItem("accessToken");
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,16 +37,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("accessToken");
 
     if (token) {
-      setAccessToken(token);
+      setToken(token);
 
       api
         .get("/api/dashboard/stats")
         .then(() => {
-          // Token is valid — get user from token or keep existing
+          // Token is valid — user stays authenticated
         })
         .catch(() => {
-          setAccessToken(null);
-          sessionStorage.removeItem("accessToken");
+          setToken(null);
         })
         .finally(() => setLoading(false));
     } else {
@@ -49,8 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       data: { accessToken: string; user: User };
     };
 
-    setAccessToken(res.data.accessToken);
-    sessionStorage.setItem("accessToken", res.data.accessToken);
+    setToken(res.data.accessToken);
     setUser(res.data.user);
   }, []);
 
@@ -59,8 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       data: { accessToken: string; user: User };
     };
 
-    setAccessToken(res.data.accessToken);
-    sessionStorage.setItem("accessToken", res.data.accessToken);
+    setToken(res.data.accessToken);
     setUser(res.data.user);
   }, []);
 
@@ -71,8 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // ignore
     }
 
-    setAccessToken(null);
-    sessionStorage.removeItem("accessToken");
+    setToken(null);
     setUser(null);
   }, []);
 

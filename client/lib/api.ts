@@ -8,21 +8,6 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-let accessToken: string | null = null;
-
-export const setAccessToken = (token: string | null) => {
-  accessToken = token;
-};
-
-export const getAccessToken = () => accessToken;
-
-api.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
-});
-
 let isRefreshing = false;
 let refreshQueue: Array<{
   resolve: (token: string) => void;
@@ -55,7 +40,7 @@ api.interceptors.response.use(
         );
 
         const newToken = data.data.accessToken;
-        setAccessToken(newToken);
+        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
 
         refreshQueue.forEach(({ resolve }) => resolve(newToken));
         refreshQueue = [];
@@ -63,7 +48,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch {
-        setAccessToken(null);
+        delete api.defaults.headers.common.Authorization;
         refreshQueue.forEach(({ reject }) => reject(error));
         refreshQueue = [];
 
