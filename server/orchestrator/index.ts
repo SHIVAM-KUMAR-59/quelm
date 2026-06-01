@@ -21,10 +21,16 @@ const agentTypes: AgentType[] = [
 
 export class Orchestrator {
   private queueEventsInstances: QueueEvents[] = [];
+  private staleRunCleanupInterval: ReturnType<typeof setInterval> | null = null;
+  private readonly STALE_RUN_TIMEOUT_MS = 10 * 60 * 1000;
+  private readonly STALE_RUN_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
   constructor(public readonly prisma: PrismaClient) {}
 
   public start = async () => {
+    await this.cleanupStaleRuns();
+    this.startStaleRunCleanup();
+
     for (const agentType of agentTypes) {
       const queueEventInstance = new QueueEvents(agentType, {
         connection: redis,
@@ -49,6 +55,8 @@ export class Orchestrator {
   };
 
   public stop = async () => {
+    this.stopStaleRunCleanup();
+
     logger.info("Closing all events");
 
     await Promise.all(
@@ -58,6 +66,73 @@ export class Orchestrator {
     );
 
     logger.success("All events closed");
+  };
+
+  private startStaleRunCleanup = () => {
+    this.staleRunCleanupInterval = setInterval(
+      this.cleanupStaleRuns,
+      this.STALE_RUN_CLEANUP_INTERVAL_MS,
+    );
+    logger.info("Stale run cleanup started");
+  };
+
+  private stopStaleRunCleanup = () => {
+    if (this.staleRunCleanupInterval) {
+      clearInterval(this.staleRunCleanupInterval);
+      this.staleRunCleanupInterval = null;
+      logger.info("Stale run cleanup stopped");
+    }
+  };
+
+  private cleanupStaleRuns = async () => {
+    try {
+      const cutoff = new Date(Date.now() - this.STALE_RUN_TIMEOUT_MS);
+
+      const staleRuns = await this.prisma.workflowRun.findMany({
+        where: {
+          status: RunStatus.RUNNING,
+          startedAt: { lt: cutoff },
+          tasks: {
+            none: {
+              status: { in: [TaskStatus.RUNNING, TaskStatus.COMPLETED] },
+            },
+          },
+        },
+      });
+
+      if (staleRuns.length === 0) {
+        return;
+      }
+
+      logger.warn(`Found ${staleRuns.length} stale run(s) — failing`);
+
+      for (const run of staleRuns) {
+        await this.prisma.workflowRun.update({
+          where: { id: run.id },
+          data: {
+            status: RunStatus.FAILED,
+            error: "Run timed out — no task progressed for more than 10 minutes",
+            completedAt: new Date(),
+          },
+        });
+
+        await this.prisma.task.updateMany({
+          where: { runId: run.id, status: TaskStatus.PENDING },
+          data: { status: TaskStatus.CANCELLED },
+        });
+
+        runEmitter.emit(`run:${run.id}`, {
+          type: "RUN_FAILED",
+          runId: run.id,
+          status: RunStatus.FAILED,
+          error: "Run timed out — no task progressed for more than 10 minutes",
+        });
+
+        logger.warn(`Stale run failed: ${run.id}`);
+      }
+    } catch (error) {
+      logger.error(`Error during stale run cleanup: ${error}`);
+    }
   };
 
   private buildDependencyMap = (nodes: Node[], edges: Edge[]): Map<string, string[]> => {
