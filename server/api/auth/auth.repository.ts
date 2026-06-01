@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import { PrismaClient, User, RefreshToken } from "@prisma/client";
 
 export class AuthRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -13,5 +13,25 @@ export class AuthRepository {
 
   async create(data: { email: string; password: string; name: string }): Promise<User> {
     return this.prisma.user.create({ data });
+  }
+
+  async createRefreshToken(data: {
+    token: string;
+    userId: string;
+    expiresAt: Date;
+  }): Promise<RefreshToken> {
+    return this.prisma.refreshToken.create({ data });
+  }
+
+  async findRefreshToken(token: string): Promise<RefreshToken | null> {
+    return this.prisma.refreshToken.findUnique({ where: { token } });
+  }
+
+  async deleteRefreshToken(token: string): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({ where: { token } });
+  }
+
+  async deleteUserRefreshTokens(userId: string): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 }

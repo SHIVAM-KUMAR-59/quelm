@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import config from "../../config";
 import { AuthRepository } from "./auth.repository";
 import { ValidationError, ApiError } from "../../utils/errors";
@@ -36,7 +37,7 @@ export class AuthService {
       name,
     });
 
-    const tokens = this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user.id);
 
     return {
       user: { id: user.id, email: user.email, name: user.name },
@@ -63,7 +64,7 @@ export class AuthService {
       throw new ApiError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
 
-    const tokens = this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user.id);
 
     return {
       user: { id: user.id, email: user.email, name: user.name },
@@ -72,33 +73,52 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    try {
-      const decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET) as {
-        userId: string;
-      };
+    const stored = await this.authRepository.findRefreshToken(refreshToken);
 
-      const user = await this.authRepository.findById(decoded.userId);
-
-      if (!user) {
-        throw new ApiError("User not found", 401, "UNAUTHORIZED");
-      }
-
-      const accessToken = this.generateAccessToken(user.id);
-
-      return {
-        user: { id: user.id, email: user.email, name: user.name },
-        accessToken,
-      };
-    } catch {
+    if (!stored) {
       throw new ApiError("Invalid refresh token", 401, "UNAUTHORIZED");
     }
+
+    if (stored.expiresAt < new Date()) {
+      await this.authRepository.deleteRefreshToken(refreshToken);
+      throw new ApiError("Refresh token expired", 401, "UNAUTHORIZED");
+    }
+
+    const user = await this.authRepository.findById(stored.userId);
+
+    if (!user) {
+      await this.authRepository.deleteRefreshToken(refreshToken);
+      throw new ApiError("User not found", 401, "UNAUTHORIZED");
+    }
+
+    const accessToken = this.generateAccessToken(user.id);
+
+    return {
+      user: { id: user.id, email: user.email, name: user.name },
+      accessToken,
+    };
   }
 
-  private generateTokens(userId: string) {
+  async logout(refreshToken: string) {
+    await this.authRepository.deleteRefreshToken(refreshToken);
+  }
+
+  private async generateTokens(userId: string) {
     const accessToken = this.generateAccessToken(userId);
-    const refreshToken = jwt.sign({ userId }, config.JWT_REFRESH_SECRET, {
-      expiresIn: this.getRefreshTokenExpiryS(),
+    const refreshTokenValue = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + this.getRefreshTokenExpiryMs());
+
+    await this.authRepository.createRefreshToken({
+      token: refreshTokenValue,
+      userId,
+      expiresAt,
     });
+
+    const refreshToken = jwt.sign(
+      { tokenId: refreshTokenValue },
+      config.JWT_REFRESH_SECRET,
+      { expiresIn: this.getRefreshTokenExpiryS() },
+    );
 
     return { accessToken, refreshToken };
   }

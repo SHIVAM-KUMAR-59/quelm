@@ -72,18 +72,28 @@ export class AuthController {
     }
   };
 
-  logout = async (_req: Request, res: Response) => {
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      path: "/api/auth",
-    });
+  logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const refreshToken = req.cookies?.refreshToken;
 
-    res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+      if (refreshToken) {
+        await this.authService.logout(refreshToken);
+      }
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/api/auth",
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
   };
 
   private setRefreshCookie(res: Response, refreshToken: string) {
