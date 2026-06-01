@@ -488,9 +488,9 @@ Runs that have been in `RUNNING` status for more than 10 minutes with no task ac
 
 ## Roadmap
 
-- [ ] User authentication (JWT + refresh tokens)
-- [ ] HTTP Agent implementation
-- [ ] Transform Agent implementation
+- [x] User authentication (JWT + refresh tokens)
+- [x] HTTP Agent implementation
+- [x] Transform Agent implementation
 - [ ] Node name editing in the workflow builder
 - [ ] Workflow versioning
 - [ ] Scheduled workflow triggers (cron)
