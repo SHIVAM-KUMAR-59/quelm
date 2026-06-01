@@ -57,10 +57,7 @@ const config = {
   GROQ_API_KEY: requireEnv("GROQ_API_KEY"),
   GROQ_MODEL: getString("GROQ_MODEL", "llama-3.3-70b-versatile"),
 
-  JWT_SECRET: requireEnv("JWT_SECRET"),
-  JWT_REFRESH_SECRET: requireEnv("JWT_REFRESH_SECRET"),
-  ACCESS_TOKEN_EXPIRY: getString("ACCESS_TOKEN_EXPIRY", "15m"),
-  REFRESH_TOKEN_EXPIRY: getString("REFRESH_TOKEN_EXPIRY", "7d"),
+  CLIENT_URL: getString("CLIENT_URL", "http://localhost:3000"),
 
   NODE_ENV: getString("NODE_ENV", "development"),
   IS_PRODUCTION: getString("NODE_ENV", "development") === "production",
