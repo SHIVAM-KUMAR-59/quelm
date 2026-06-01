@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import { Loader } from "@/components/ui/Loader";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -17,11 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-pulse rounded-full border border-border bg-card" />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
