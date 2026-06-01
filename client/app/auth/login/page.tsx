@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useAuth } from "@/providers/auth-provider";
 import { toast } from "sonner";
 
@@ -51,7 +57,9 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm text-zinc-400">Email</label>
+              <label htmlFor="email" className="text-sm text-zinc-400">
+                Email
+              </label>
               <Input
                 id="email"
                 type="email"
@@ -64,7 +72,9 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-sm text-zinc-400">Password</label>
+              <label htmlFor="password" className="text-sm text-zinc-400">
+                Password
+              </label>
               <Input
                 id="password"
                 type="password"
@@ -87,7 +97,10 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-zinc-500">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/register" className="text-white underline-offset-4 hover:underline">
+            <Link
+              href="/auth/register"
+              className="text-white underline-offset-4 hover:underline"
+            >
               Register
             </Link>
           </p>

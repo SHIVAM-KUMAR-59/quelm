@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { api } from "@/lib/api";
 
 type User = {
@@ -54,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await api.post("/api/auth/login", { email, password }) as {
+    const res = (await api.post("/api/auth/login", { email, password })) as {
       data: { accessToken: string; user: User };
     };
 
@@ -63,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
-    const res = await api.post("/api/auth/register", { email, password, name }) as {
+    const res = (await api.post("/api/auth/register", { email, password, name })) as {
       data: { accessToken: string; user: User };
     };
 
