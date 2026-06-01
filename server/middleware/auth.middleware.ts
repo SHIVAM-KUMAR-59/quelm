@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import config from "../config";
+import { logger } from "../config/logger.config";
 import { ApiError } from "../utils/errors";
 
 export const authenticate = (req: Request, _res: Response, next: NextFunction) => {
@@ -15,6 +16,7 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction) =
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: string };
     req.userId = decoded.userId;
+    logger.success(`User authenticated: ${decoded.userId}`);
     next();
   } catch {
     throw new ApiError("Invalid or expired token", 401, "UNAUTHORIZED");
@@ -34,6 +36,7 @@ export const optionalAuth = (req: Request, _res: Response, next: NextFunction) =
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET) as { userId: string };
     req.userId = decoded.userId;
+    logger.success(`User authenticated (optional): ${decoded.userId}`);
   } catch {
     // Ignore invalid tokens for optional auth
   }
