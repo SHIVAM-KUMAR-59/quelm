@@ -59,6 +59,11 @@ const config = {
 
   CLIENT_URL: getString("CLIENT_URL", "http://localhost:3000"),
 
+  JWT_SECRET: requireEnv("JWT_SECRET"),
+  JWT_REFRESH_SECRET: requireEnv("JWT_REFRESH_SECRET"),
+  ACCESS_TOKEN_EXPIRY: getString("ACCESS_TOKEN_EXPIRY", "15m"),
+  REFRESH_TOKEN_EXPIRY: getString("REFRESH_TOKEN_EXPIRY", "7d"),
+
   NODE_ENV: getString("NODE_ENV", "development"),
   IS_PRODUCTION: getString("NODE_ENV", "development") === "production",
   IS_DEVELOPMENT: getString("NODE_ENV", "development") === "development",
