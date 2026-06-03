@@ -21,6 +21,10 @@ const triggerRun = async (id: string, input: Record<string, unknown>) => {
   return await api.post(`/api/workflow/${id}/run`, { data: { input } });
 };
 
+const deleteWorkflow = async (id: string) => {
+  return await api.delete(`/api/workflow/${id}`);
+};
+
 export const useWorkflows = () => {
   return useQuery({
     queryKey: ["workflows"],
@@ -60,6 +64,17 @@ export const useTriggerRun = () => {
       triggerRun(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["runs"] });
+    },
+  });
+};
+
+export const useDeleteWorkflow = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteWorkflow,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workflows"] });
     },
   });
 };
