@@ -396,22 +396,17 @@ const WorkflowDetailPage = () => {
           <DialogHeader>
             <DialogTitle>Delete Workflow</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-medium text-foreground">{workflow.name}</span>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <span className="font-medium text-foreground">{workflow.name}</span>? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
+            <Button variant="destructive" disabled={isDeleting} onClick={handleDelete}>
               {isDeleting ? "Deleting..." : "Delete Workflow"}
             </Button>
           </DialogFooter>
