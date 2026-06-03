@@ -52,6 +52,7 @@ const NodeConfigPanel = ({ node, onClose, onSave }: NodeConfigPanelProps) => {
   );
 
   // Shared state
+  const [label, setLabel] = useState(node.data.label);
   const [critical, setCritical] = useState(node.data.critical ?? true);
 
   const handleSave = () => {
@@ -82,6 +83,7 @@ const NodeConfigPanel = ({ node, onClose, onSave }: NodeConfigPanelProps) => {
 
     onSave(node.id, {
       ...node.data,
+      label,
       config,
       critical,
     });
