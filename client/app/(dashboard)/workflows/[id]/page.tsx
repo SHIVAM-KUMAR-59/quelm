@@ -13,6 +13,7 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  Trash2,
 } from "lucide-react";
 import {
   Background,
@@ -26,11 +27,19 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
-import { useWorkflow } from "@/hooks/use-workflow";
+import { useWorkflow, useTriggerRun, useDeleteWorkflow } from "@/hooks/use-workflow";
 import { useWorkflowRuns } from "@/hooks/use-run";
-import { useTriggerRun } from "@/hooks/use-workflow";
 import AgentNode from "@/components/workflows/builder/AgentNode";
 import ErrorState from "@/components/ui/ErrorState";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { AgentNodeData, WorkflowDefinition } from "@/lib/types";
 import { WorkflowRun } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -65,10 +74,12 @@ const WorkflowDetailPage = () => {
     refetch: refetchRuns,
   } = useWorkflowRuns(id);
   const { mutateAsync: triggerRun, isPending } = useTriggerRun();
+  const { mutateAsync: deleteWorkflow, isPending: isDeleting } = useDeleteWorkflow();
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<AgentNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [inputJson, setInputJson] = useState("{\n  \n}");
 
   const workflow = workflowData?.data;
@@ -119,6 +130,16 @@ const WorkflowDetailPage = () => {
       } else {
         toast.error("Failed to trigger workflow");
       }
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteWorkflow(id);
+      toast.success("Workflow deleted successfully");
+      router.push("/workflows");
+    } catch {
+      toast.error("Failed to delete workflow");
     }
   };
 
@@ -203,13 +224,23 @@ const WorkflowDetailPage = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card-foreground px-4 py-2 text-sm font-medium text-background transition-all duration-300 hover:scale-[1.03] hover:bg-white hover:shadow-lg active:scale-[0.98]"
-          >
-            <Play className="h-4 w-4" />
-            Run Workflow
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDeleteDialogOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-all duration-300 hover:bg-red-500/20 active:scale-[0.98]"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </button>
+
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-card-foreground px-4 py-2 text-sm font-medium text-background transition-all duration-300 hover:scale-[1.03] hover:bg-white hover:shadow-lg active:scale-[0.98]"
+            >
+              <Play className="h-4 w-4" />
+              Run Workflow
+            </button>
+          </div>
         </div>
 
         {/* Canvas */}
@@ -358,6 +389,34 @@ const WorkflowDetailPage = () => {
           )}
         </div>
       </section>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Workflow</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-medium text-foreground">{workflow.name}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={handleDelete}
+            >
+              {isDeleting ? "Deleting..." : "Delete Workflow"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Run Modal */}
       {modalOpen && (
