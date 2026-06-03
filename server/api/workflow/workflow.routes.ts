@@ -20,6 +20,7 @@ export const createWorkflowRouter = (
   router.get("/", controller.getAllWorkflows);
   router.get("/:id", controller.getWorkflowById);
   router.post("/", controller.createWorkflow);
+  router.delete("/:id", controller.deleteWorkflow);
   router.post("/:id/run", controller.triggerRun);
 
   return router;
