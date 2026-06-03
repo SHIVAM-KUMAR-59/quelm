@@ -150,3 +150,20 @@
   background: oklch(0.3 0 0);
   color: white;
 }
+
+/* ========================= 
+   SCREEN GATE 
+========================= */
+
+#unsupported-root {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  #app-root {
+    display: none;
+  }
+  #unsupported-root {
+    display: block;
+  }
+}
