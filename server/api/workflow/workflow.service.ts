@@ -57,4 +57,21 @@ export class WorkflowService {
     const run = await this.orchestrator.triggerRun(workflowId, input, userId);
     return run;
   }
+
+  async deleteWorkflow(id: string, userId: string) {
+    if (!id) {
+      throw new ValidationError("Workflow ID is required");
+    }
+
+    const workflow = await this.workflowRepository.findById(id);
+    if (workflow === null) {
+      throw new NotFoundError("Workflow", id);
+    }
+
+    if (workflow.userId && workflow.userId !== userId) {
+      throw new NotFoundError("Workflow", id);
+    }
+
+    return await this.workflowRepository.delete(id);
+  }
 }
