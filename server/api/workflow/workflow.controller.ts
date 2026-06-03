@@ -77,4 +77,18 @@ export class WorkflowController {
       next(err);
     }
   };
+
+  deleteWorkflow: ParamsController<params> = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const workflow = await this.workflowService.deleteWorkflow(id, req.userId!);
+      res.status(200).json({
+        message: "Workflow deleted successfully",
+        success: true,
+        data: workflow,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
