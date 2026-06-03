@@ -109,6 +109,18 @@ const NodeConfigPanel = ({ node, onClose, onSave }: NodeConfigPanelProps) => {
 
       {/* Fields */}
       <div className="mt-8 flex max-h-[calc(100vh-16rem)] flex-col gap-5 overflow-y-auto">
+        {/* Node Name */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Node Name</label>
+
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none"
+            placeholder="Enter a name for this node..."
+          />
+        </div>
+
         {/* LLM */}
         {type === "LLM_AGENT" && (
           <>
