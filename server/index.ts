@@ -32,8 +32,6 @@ app.use(
     },
   }),
 );
-app.use(requestLogger);
-
 app.get("/health", (_, res) => {
   res.json({ status: "ok" });
 });
@@ -56,6 +54,7 @@ const start = async (): Promise<void> => {
 
     // Wire in the middleware and routes
     app.use(express.json());
+    app.use(requestLogger);
     app.use(createApiRoutes(orchestrator, prisma));
     app.use(errorHandlerMiddleware);
 
