@@ -4,7 +4,7 @@
 
 A distributed multi-agent workflow platform where AI agents collaborate asynchronously to execute complex workflows at scale. Built with event-driven architecture, message queues, real-time orchestration, and a visual workflow builder.
 
-> **Status:** Active Development &nbsp;|&nbsp; **Stack:** TypeScript · Next.js · Express · BullMQ · PostgreSQL · Redis · Groq
+> **Status:** Active Development &nbsp;|&nbsp; **Stack:** TypeScript · Next.js · Express · BullMQ · PostgreSQL · Redis · Groq · Vitest
 
 ---
 
@@ -145,6 +145,7 @@ flowchart TB
 | AI Provider      | Groq (LLaMA 3.3 70B)           | Fast LLM inference, generous free tier  |
 | Real-time        | Server-Sent Events             | Live run monitor updates                |
 | Containerization | Docker Compose                 | Local Postgres and Redis                |
+| Testing          | Vitest + Supertest             | Unit, integration, and API tests        |
 | Deployment       | Vercel + Render                | Frontend and backend hosting            |
 
 ---
@@ -161,6 +162,17 @@ quelm/
 │   ├── providers/                  # Context providers
 │   └── package.json
 ├── server/                         # Express backend
+│   ├── agents/                     # Agent worker implementations
+│   │   ├── base.agent.ts           # Abstract base class
+│   │   ├── llm.agent.ts            # Groq LLM agent
+│   │   └── registry.ts             # Agent startup registry
+│   ├── __tests__/                  # Test suite
+│   │   ├── api/                    # API integration tests (supertest)
+│   │   ├── helpers/                # Mock factories and app builder
+│   │   ├── orchestrator/           # Orchestrator workflow tests
+│   │   ├── services/               # Service layer unit tests
+│   │   ├── utils/                  # Utility function tests
+│   │   └── setup.ts                # Global mocks and env config
 │   ├── agents/                     # Agent worker implementations
 │   │   ├── base.agent.ts           # Abstract base class
 │   │   ├── llm.agent.ts            # Groq LLM agent
@@ -247,6 +259,10 @@ CLIENT_URL=http://localhost:3000
 
 # Groq
 GROQ_API_KEY=your_groq_api_key_here
+
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
 ```
 
 **`client/.env.local`** — Frontend config:
@@ -293,6 +309,18 @@ pnpm dev:server
 # From root
 pnpm dev:client
 ```
+
+**5. Run tests (no infrastructure required):**
+
+```bash
+# Run all backend tests
+pnpm test:server
+
+# Watch mode
+pnpm test:server:watch
+```
+
+Tests use mocked dependencies — no database, Redis, or API keys needed.
 
 The API will be available at `http://localhost:8000` and the frontend at `http://localhost:3000`.
 
@@ -461,6 +489,59 @@ Runs that have been in `RUNNING` status for more than 10 minutes with no task ac
 
 ---
 
+## Testing
+
+The backend has a comprehensive test suite covering services, orchestrator logic, and API routes. Tests use **Vitest** with mocked infrastructure — no database, Redis, or external API keys are required.
+
+### Test Structure
+
+```
+server/__tests__/
+├── setup.ts                # Global mocks (Prisma, Redis, BullMQ, Groq, Winston)
+├── helpers/
+│   ├── prisma.ts           # Mock PrismaClient factory
+│   └── app.ts              # Express app builder for integration tests
+├── utils/                  # Error classes, template interpolation
+├── services/               # Workflow, auth, run, agent, dashboard
+├── orchestrator/           # Workflow engine, dependency resolution, event handling
+└── api/                    # Integration tests via supertest
+```
+
+### Coverage Areas
+
+| Layer       | Tests | What's tested                                      |
+| ----------- | ----- | -------------------------------------------------- |
+| Utils       | 11    | Error classes, `{{placeholder}}` interpolation     |
+| Services    | 38    | CRUD validation, ownership checks, auth flow, stats |
+| Orchestrator| 13    | triggerRun, dependency graph, task dispatch, failure handling |
+| API         | 20    | Auth, workflows, agents, dashboard — via supertest |
+
+### Running Tests
+
+```bash
+# All tests
+pnpm test:server
+
+# Watch mode
+pnpm test:server:watch
+
+# Run a specific test file
+pnpm --filter server vitest run __tests__/services/workflow.service.test.ts
+```
+
+### Mock Strategy
+
+- **`@prisma/client`** — globally mocked; `PrismaClient` returns configured mock methods
+- **`bullmq`** — `Queue`, `Worker`, and `QueueEvents` are mocked; no Redis connection
+- **`ioredis`** — `Redis` constructor returns a no-op mock
+- **`groq-sdk`** — `Groq` returns a mock `chat.completions.create`
+- **`winston`** — `createLogger` returns a no-op logger
+- **`bcryptjs`** — `hash` and `compare` are stubbed to avoid real crypto
+
+Services use dependency injection (mock repositories), so the orchestrator and API tests use a mock `PrismaClient` while service unit tests mock only their specific repository.
+
+---
+
 ## Deployment
 
 ### Frontend — Vercel
@@ -491,6 +572,7 @@ Runs that have been in `RUNNING` status for more than 10 minutes with no task ac
 - [x] User authentication (JWT + refresh tokens)
 - [x] HTTP Agent implementation
 - [x] Transform Agent implementation
+- [x] Backend testing infrastructure (Vitest, 83 tests)
 - [ ] Node name editing in the workflow builder
 - [ ] Workflow versioning
 - [ ] Scheduled workflow triggers (cron)
