@@ -74,7 +74,13 @@ describe("Orchestrator", () => {
       definition: {
         nodes: [
           { id: "node-1", type: "LLM_AGENT", name: "Step 1", critical: true, config: {} },
-          { id: "node-2", type: "HTTP_AGENT", name: "Step 2", critical: true, config: {} },
+          {
+            id: "node-2",
+            type: "HTTP_AGENT",
+            name: "Step 2",
+            critical: true,
+            config: {},
+          },
         ],
         edges: [{ id: "edge-1", source: "node-1", target: "node-2" }],
       },
@@ -105,9 +111,9 @@ describe("Orchestrator", () => {
     it("throws if workflow is not found", async () => {
       prisma.workflowDefinition.findUnique.mockResolvedValue(null);
 
-      await expect(
-        orchestrator.triggerRun("nonexistent", {}),
-      ).rejects.toThrow("Workflow not found");
+      await expect(orchestrator.triggerRun("nonexistent", {})).rejects.toThrow(
+        "Workflow not found",
+      );
     });
 
     it("dispatches first-wave tasks (nodes with no dependencies)", async () => {
@@ -301,9 +307,7 @@ describe("Orchestrator", () => {
         status: "COMPLETED",
         output: { result: "done" },
       });
-      prisma.task.findMany.mockResolvedValue([
-        { id: "task-1", status: "COMPLETED" },
-      ]);
+      prisma.task.findMany.mockResolvedValue([{ id: "task-1", status: "COMPLETED" }]);
 
       await (orchestrator as any).onTaskCompleted("job-1", "LLM_AGENT");
 

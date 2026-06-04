@@ -95,9 +95,9 @@ describe("AuthService", () => {
     });
 
     it("throws ApiError when email or password missing", async () => {
-      await expect(
-        service.login({ email: "", password: "" }),
-      ).rejects.toThrow(ValidationError);
+      await expect(service.login({ email: "", password: "" })).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 

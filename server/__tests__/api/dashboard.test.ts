@@ -63,9 +63,7 @@ describe("Dashboard API", () => {
   describe("GET /api/dashboard/stats", () => {
     it("returns dashboard stats", async () => {
       prisma.workflowDefinition.count.mockResolvedValue(5);
-      prisma.workflowRun.count
-        .mockResolvedValueOnce(20)
-        .mockResolvedValueOnce(15);
+      prisma.workflowRun.count.mockResolvedValueOnce(20).mockResolvedValueOnce(15);
       prisma.agent.count.mockResolvedValue(3);
 
       const res = await request(app)

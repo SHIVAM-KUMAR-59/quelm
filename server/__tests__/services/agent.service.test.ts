@@ -20,9 +20,7 @@ describe("AgentService", () => {
 
   describe("getAllAgents", () => {
     it("returns all agents", async () => {
-      const agents = [
-        { id: "agent-1", name: "LLM_AGENT_1", type: "LLM_AGENT" },
-      ];
+      const agents = [{ id: "agent-1", name: "LLM_AGENT_1", type: "LLM_AGENT" }];
       repo.findAll.mockResolvedValue(agents);
 
       const result = await service.getAllAgents();
@@ -50,9 +48,7 @@ describe("AgentService", () => {
     it("throws NotFoundError when agent does not exist", async () => {
       repo.findById.mockResolvedValue(null);
 
-      await expect(service.getAgentById("nonexistent")).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(service.getAgentById("nonexistent")).rejects.toThrow(NotFoundError);
     });
   });
 });

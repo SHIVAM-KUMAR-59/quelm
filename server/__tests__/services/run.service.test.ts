@@ -43,9 +43,7 @@ describe("WorkflowRunService", () => {
     });
 
     it("throws ValidationError when id is empty", async () => {
-      await expect(service.getRunById("", "user-1")).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(service.getRunById("", "user-1")).rejects.toThrow(ValidationError);
     });
 
     it("throws NotFoundError when run does not exist", async () => {
@@ -59,9 +57,7 @@ describe("WorkflowRunService", () => {
     it("throws NotFoundError when run belongs to another user", async () => {
       repo.findById.mockResolvedValue({ id: "run-1", userId: "user-2" });
 
-      await expect(service.getRunById("run-1", "user-1")).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(service.getRunById("run-1", "user-1")).rejects.toThrow(NotFoundError);
     });
   });
 

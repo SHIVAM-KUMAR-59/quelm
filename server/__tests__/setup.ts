@@ -143,7 +143,9 @@ vi.mock("@prisma/client", async () => {
 vi.mock("bullmq", () => {
   const createMockQueue = () => ({
     add: vi.fn().mockResolvedValue({ id: "mock-job-id" }),
-    getJob: vi.fn().mockResolvedValue({ id: "mock-job-id", data: { taskId: "mock-task-id" } }),
+    getJob: vi
+      .fn()
+      .mockResolvedValue({ id: "mock-job-id", data: { taskId: "mock-task-id" } }),
     close: vi.fn().mockResolvedValue(undefined),
     on: vi.fn().mockReturnThis(),
   });

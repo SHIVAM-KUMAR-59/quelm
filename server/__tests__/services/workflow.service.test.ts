@@ -64,18 +64,18 @@ describe("WorkflowService", () => {
     it("throws NotFoundError when workflow does not exist", async () => {
       repo.findById.mockResolvedValue(null);
 
-      await expect(
-        service.getWorkflowById("nonexistent", "user-1"),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.getWorkflowById("nonexistent", "user-1")).rejects.toThrow(
+        NotFoundError,
+      );
     });
 
     it("throws NotFoundError when workflow belongs to another user", async () => {
       const workflow = { id: "wf-1", name: "Test", userId: "user-2" };
       repo.findById.mockResolvedValue(workflow);
 
-      await expect(
-        service.getWorkflowById("wf-1", "user-1"),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.getWorkflowById("wf-1", "user-1")).rejects.toThrow(
+        NotFoundError,
+      );
     });
   });
 
@@ -113,11 +113,7 @@ describe("WorkflowService", () => {
       const runResult = { runId: "run-1", status: "RUNNING", workflowId: "wf-1" };
       orchestrator.triggerRun.mockResolvedValue(runResult);
 
-      const result = await service.triggerRun(
-        "wf-1",
-        { prompt: "hello" },
-        "user-1",
-      );
+      const result = await service.triggerRun("wf-1", { prompt: "hello" }, "user-1");
 
       expect(orchestrator.triggerRun).toHaveBeenCalledWith(
         "wf-1",
@@ -141,26 +137,24 @@ describe("WorkflowService", () => {
     });
 
     it("throws ValidationError when id is empty", async () => {
-      await expect(service.deleteWorkflow("", "user-1")).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(service.deleteWorkflow("", "user-1")).rejects.toThrow(ValidationError);
     });
 
     it("throws NotFoundError when workflow does not exist", async () => {
       repo.findById.mockResolvedValue(null);
 
-      await expect(
-        service.deleteWorkflow("nonexistent", "user-1"),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.deleteWorkflow("nonexistent", "user-1")).rejects.toThrow(
+        NotFoundError,
+      );
     });
 
     it("throws NotFoundError when workflow belongs to another user", async () => {
       const workflow = { id: "wf-1", name: "Test", userId: "user-2" };
       repo.findById.mockResolvedValue(workflow);
 
-      await expect(
-        service.deleteWorkflow("wf-1", "user-1"),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.deleteWorkflow("wf-1", "user-1")).rejects.toThrow(
+        NotFoundError,
+      );
     });
   });
 });
