@@ -29,4 +29,11 @@ export default [
       "@typescript-eslint/no-unused-vars": "warn",
     },
   },
+
+  {
+    files: ["server/__tests__/**/*.test.ts", "server/__tests__/helpers/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];
