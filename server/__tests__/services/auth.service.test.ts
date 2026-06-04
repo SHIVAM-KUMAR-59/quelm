@@ -86,13 +86,6 @@ describe("AuthService", () => {
   });
 
   describe("login", () => {
-    const mockUser = {
-      id: "user-1",
-      email: "test@example.com",
-      password: "",
-      name: "Test User",
-    };
-
     it("throws ApiError with invalid credentials when user not found", async () => {
       repo.findByEmail.mockResolvedValue(null);
 
