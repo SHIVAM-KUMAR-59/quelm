@@ -43,25 +43,60 @@ If anything is unclear, open a discussion before starting work.
 
 ```
 quelm/
-├── client/                    # Next.js frontend (Vercel)
-│   ├── app/                   # App Router pages
-│   ├── components/            # Reusable React components
-│   ├── hooks/                 # TanStack Query hooks
-│   └── lib/                   # Types, utilities, API client
-├── server/                    # Express backend (Railway)
-│   ├── agents/                # Agent worker implementations
-│   ├── api/                   # Modular REST API (controller/service/repo)
-│   ├── config/                # Typed env, logger, Prisma, Redis, Groq
-│   ├── events/                # RunEmitter for SSE broadcasting
-│   ├── orchestrator/          # Workflow orchestration engine
-│   ├── queue/                 # BullMQ queue abstraction
-│   ├── middleware/            # Global error handler
-│   ├── prisma/                # Schema and migrations
-│   └── utils/                 # Errors, types, template interpolation
-├── docker-compose.yml         # Local Postgres + Redis
-├── .eslintrc.js               # Shared ESLint config
-├── .prettierrc                # Shared Prettier config
-└── pnpm-workspace.yaml        # pnpm workspace config
+├── client/                         # Next.js frontend
+│   ├── __tests__/                  # Test Suite
+│   ├── app/                        # App router pages
+│   ├── components/                 # React components
+│   ├── hooks/                      # Custom hooks for API calling
+│   ├── lib/                        # Utility methods and types
+│   ├── providers/                  # Context providers
+│   └── package.json
+├── server/                         # Express backend
+│   ├── agents/                     # Agent worker implementations
+│   │   ├── base.agent.ts           # Abstract base class
+│   │   ├── llm.agent.ts            # Groq LLM agent
+│   │   └── registry.ts             # Agent startup registry
+│   ├── __tests__/                  # Test suite
+│   │   ├── api/                    # API integration tests (supertest)
+│   │   ├── helpers/                # Mock factories and app builder
+│   │   ├── orchestrator/           # Orchestrator workflow tests
+│   │   ├── services/               # Service layer unit tests
+│   │   ├── utils/                  # Utility function tests
+│   │   └── setup.ts                # Global mocks and env config
+│   ├── agents/                     # Agent worker implementations
+│   │   ├── base.agent.ts           # Abstract base class
+│   │   ├── llm.agent.ts            # Groq LLM agent
+│   │   └── registry.ts             # Agent startup registry
+│   ├── api/                        # Modular REST API
+│   │   ├── workflow/               # Workflow module
+│   │   ├── run/                    # Run module
+│   │   └── agent/                  # Agent module
+│   ├── config/                     # App configuration
+│   │   ├── index.ts                # Typed env variables
+│   │   ├── logger.config.ts        # Winston logger
+│   │   ├── prisma.config.ts        # Prisma singleton
+│   │   ├── redis.config.ts         # Redis singleton
+│   │   └── groq.config.ts          # Groq client singleton
+│   ├── events/
+│   │   └── run.emitter.ts          # In-process event emitter for SSE
+│   ├── orchestrator/
+│   │   └── index.ts                # Workflow orchestration engine
+│   ├── queue/
+│   │   └── index.ts                # BullMQ queue abstraction
+│   ├── middleware/
+│   │   └── error.middleware.ts     # Global error handler
+│   ├── prisma/
+│   │   └── schema.prisma           # Database schema
+│   ├── utils/
+│   │   ├── errors.ts               # Typed API error classes
+│   │   ├── types.ts                # Shared TypeScript types
+│   │   └── template.utils.ts       # Prompt interpolation
+│   └── index.ts                    # Server entry point
+├── docker-compose.yml              # Postgres + Redis
+├── .eslintrc.js                    # Shared ESLint config
+├── .prettierrc                     # Shared Prettier config
+├── tsconfig.base.json              # Base TypeScript config
+└── pnpm-workspace.yaml             # pnpm workspace config
 ```
 
 ---
@@ -123,6 +158,22 @@ pnpm dev:client   # http://localhost:3000
 ```bash
 curl http://localhost:8000/health
 # Should return { "status": "ok" }
+```
+
+### Run tests
+
+```bash
+# Run all backend tests
+pnpm test:server
+
+# Watch mode
+pnpm test:server:watch
+
+# Run all frontend tests
+pnpm test:client
+
+# Watch mode
+pnpm test:client:watch
 ```
 
 ---
@@ -227,15 +278,20 @@ refactor(api): extract workflow validation into service layer
    ```bash
    pnpm lint && pnpm format
    ```
-5. **Open a PR** against `main` with:
+5. **Run all tests locally** before pushing:
+   ```bash
+   pnpm test:server # test server(backend)
+   pnpm test:client # test client(frontend)
+   ```
+6. **Open a PR** against `main` with:
    - A clear title following the commit message format
    - A description of what changed and why
    - Screenshots or screen recordings for UI changes
    - Notes on any breaking changes
-6. **Address review feedback** — keep the conversation constructive
-7. **Squash commits** before merging if the branch has noisy interim commits
+7. **Address review feedback** — keep the conversation constructive
+8. **Squash commits** before merging if the branch has noisy interim commits
 
-PRs with failing CI checks will not be merged.
+> PRs with failing CI checks will not be merged.
 
 ---
 

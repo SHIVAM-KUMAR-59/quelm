@@ -155,6 +155,7 @@ flowchart TB
 ```
 quelm/
 ├── client/                         # Next.js frontend
+│   ├── __tests__/                  # Test Suite
 │   ├── app/                        # App router pages
 │   ├── components/                 # React components
 │   ├── hooks/                      # Custom hooks for API calling
