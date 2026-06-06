@@ -1,4 +1,4 @@
-name: Backend Tests
+name: Tests
 
 on:
   push:
@@ -38,3 +38,6 @@ jobs:
 
       - name: Run backend tests
         run: pnpm test:server
+
+      - name: Run frontend tests
+        run: pnpm test:client
