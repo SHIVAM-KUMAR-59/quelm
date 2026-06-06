@@ -318,6 +318,12 @@ pnpm test:server
 
 # Watch mode
 pnpm test:server:watch
+
+# Run all frontend tests
+pnpm test:client
+
+# Watch mode
+pnpm test:client:watch
 ```
 
 Tests use mocked dependencies — no database, Redis, or API keys needed.
@@ -491,11 +497,11 @@ Runs that have been in `RUNNING` status for more than 10 minutes with no task ac
 
 ## Testing
 
-The backend has a comprehensive test suite covering services, orchestrator logic, and API routes. Tests use **Vitest** with mocked infrastructure — no database, Redis, or external API keys are required.
+The project includes both backend and frontend test suites powered by **Vitest**. Tests are designed to run locally and in CI without requiring external infrastructure such as databases, Redis instances, or third-party API keys.
 
-### Test Structure
+### Backend Test Structure
 
-```
+```text
 server/__tests__/
 ├── setup.ts                # Global mocks (Prisma, Redis, BullMQ, Groq, Winston)
 ├── helpers/
@@ -507,7 +513,21 @@ server/__tests__/
 └── api/                    # Integration tests via supertest
 ```
 
+### Frontend Test Structure
+
+```text
+client/__tests__/
+├── helpers.tsx             # Shared render utilities and mock factories
+├── LoginPage.test.tsx
+├── RegisterPage.test.tsx
+├── RunPage.test.tsx
+├── AgentsPage.test.tsx
+└── StatCard.test.tsx
+```
+
 ### Coverage Areas
+
+#### Backend
 
 | Layer        | Tests | What's tested                                                 |
 | ------------ | ----- | ------------------------------------------------------------- |
@@ -516,29 +536,66 @@ server/__tests__/
 | Orchestrator | 13    | triggerRun, dependency graph, task dispatch, failure handling |
 | API          | 20    | Auth, workflows, agents, dashboard — via supertest            |
 
+#### Frontend
+
+| Area        | What's tested                                                    |
+| ----------- | ---------------------------------------------------------------- |
+| Auth Pages  | Login and registration flows, validation, redirects, and toasts  |
+| Runs Page   | Loading, error, empty, and populated states, duration formatting |
+| Agents Page | Agent listing, loading states, and empty-state rendering         |
+| Components  | Dashboard components such as StatCard                            |
+
 ### Running Tests
 
 ```bash
-# All tests
+# Run all tests
+pnpm test
+
+# Run backend tests
 pnpm test:server
 
-# Watch mode
+# Run frontend tests
+pnpm test:client
+
+# Backend watch mode
 pnpm test:server:watch
 
-# Run a specific test file
+# Frontend watch mode
+pnpm test:client:watch
+
+# Run a specific backend test file
 pnpm --filter server vitest run __tests__/services/workflow.service.test.ts
+
+# Run a specific frontend test file
+pnpm --filter client vitest run __tests__/LoginPage.test.tsx
 ```
+
+### CI Integration
+
+The test suite is automatically executed in GitHub Actions on every push and pull request to ensure that frontend and backend changes do not introduce regressions.
 
 ### Mock Strategy
 
+#### Backend
+
 - **`@prisma/client`** — globally mocked; `PrismaClient` returns configured mock methods
-- **`bullmq`** — `Queue`, `Worker`, and `QueueEvents` are mocked; no Redis connection
+- **`bullmq`** — `Queue`, `Worker`, and `QueueEvents` are mocked; no Redis connection required
 - **`ioredis`** — `Redis` constructor returns a no-op mock
 - **`groq-sdk`** — `Groq` returns a mock `chat.completions.create`
 - **`winston`** — `createLogger` returns a no-op logger
-- **`bcryptjs`** — `hash` and `compare` are stubbed to avoid real crypto
+- **`bcryptjs`** — `hash` and `compare` are stubbed to avoid real crypto operations
 
-Services use dependency injection (mock repositories), so the orchestrator and API tests use a mock `PrismaClient` while service unit tests mock only their specific repository.
+#### Frontend
+
+- **`next/navigation`** — mocked router and navigation hooks
+- **`next/link`** — rendered as a standard anchor element for assertions
+- **`sonner`** — toast notifications mocked to prevent portal rendering
+- **`@xyflow/react`** — React Flow components mocked for lightweight testing
+- **`@monaco-editor/react`** — Monaco editor replaced with a simple textarea
+- **React Query** — wrapped with a dedicated test `QueryClientProvider`
+- Shared mock factories provide reusable workflow, run, agent, and dashboard data
+
+Services use dependency injection and isolated mocks, allowing tests to run quickly and deterministically without external services.
 
 ---
 

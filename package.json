@@ -12,7 +12,9 @@
     "format": "prettier . --write",
     "check-format": "prettier . --check",
     "test:server": "pnpm --filter server test",
-    "test:server:watch": "pnpm --filter server test:watch"
+    "test:server:watch": "pnpm --filter server test:watch",
+    "test:client": "pnpm --filter client test",
+    "test:client:watch": "pnpm --filter client test:watch"
   },
   "keywords": [],
   "author": "",
