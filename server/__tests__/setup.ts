@@ -41,13 +41,18 @@ vi.mock("ioredis", () => {
     connect: vi.fn().mockResolvedValue(undefined),
     disconnect: vi.fn(),
     duplicate: vi.fn().mockReturnThis(),
+    get: vi.fn().mockResolvedValue(null),
+    set: vi.fn().mockResolvedValue("OK"),
+    del: vi.fn().mockResolvedValue(1),
+    keys: vi.fn().mockResolvedValue([]),
   };
 
-  function MockRedis() {
+  function Redis() {
     return mockRedisInstance;
   }
+  Redis.prototype = mockRedisInstance;
 
-  return { default: MockRedis, Redis: MockRedis };
+  return { default: Redis, Redis };
 });
 
 vi.mock("groq-sdk", () => {
@@ -141,33 +146,40 @@ vi.mock("@prisma/client", async () => {
 });
 
 vi.mock("bullmq", () => {
-  const createMockQueue = () => ({
+  const mockQueueInstance = {
     add: vi.fn().mockResolvedValue({ id: "mock-job-id" }),
     getJob: vi
       .fn()
       .mockResolvedValue({ id: "mock-job-id", data: { taskId: "mock-task-id" } }),
     close: vi.fn().mockResolvedValue(undefined),
     on: vi.fn().mockReturnThis(),
-  });
-
-  const MockQueue = vi.fn(createMockQueue);
-
-  const MockWorker = vi.fn(() => ({
-    close: vi.fn().mockResolvedValue(undefined),
-    on: vi.fn().mockReturnThis(),
-  }));
-
-  const MockQueueEvents = vi.fn(() => ({
-    on: vi.fn().mockReturnThis(),
-    close: vi.fn().mockResolvedValue(undefined),
-  }));
-
-  const MockJob = vi.fn();
-
-  return {
-    Queue: MockQueue,
-    Worker: MockWorker,
-    QueueEvents: MockQueueEvents,
-    Job: MockJob,
   };
+
+  const mockWorkerInstance = {
+    close: vi.fn().mockResolvedValue(undefined),
+    on: vi.fn().mockReturnThis(),
+  };
+
+  const mockQueueEventsInstance = {
+    on: vi.fn().mockReturnThis(),
+    close: vi.fn().mockResolvedValue(undefined),
+    name: "mock-queue",
+  };
+
+  function Queue() {
+    return mockQueueInstance;
+  }
+  function Worker() {
+    return mockWorkerInstance;
+  }
+  function QueueEvents() {
+    return mockQueueEventsInstance;
+  }
+  function Job() {}
+
+  Queue.prototype = mockQueueInstance;
+  Worker.prototype = mockWorkerInstance;
+  QueueEvents.prototype = mockQueueEventsInstance;
+
+  return { Queue, Worker, QueueEvents, Job };
 });

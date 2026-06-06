@@ -2,13 +2,14 @@ import { AgentType, Prisma, PrismaClient, RunStatus, TaskStatus } from "@prisma/
 
 import { QueueEvents } from "bullmq";
 
-import { redis } from "../config/redis.config";
+import { CACHE, redis } from "../config/redis.config";
 import { logger } from "../config/logger.config";
 
 import { Edge, JsonInput, Node, WorkflowDefinition } from "../utils/types";
 
 import { JobQueue } from "../queues";
 import { runEmitter } from "../events/run.emitter";
+import { cacheService } from "../cache";
 
 const agentTypes: AgentType[] = [
   AgentType.EXTRACTION_AGENT,
@@ -374,6 +375,11 @@ export class Orchestrator {
     );
 
     if (allCompleted) {
+      const workflowRun = await this.prisma.workflowRun.findUnique({
+        where: { id: completedTask.runId },
+        select: { userId: true },
+      });
+
       await this.prisma.workflowRun.update({
         where: {
           id: completedTask.runId,
@@ -384,6 +390,14 @@ export class Orchestrator {
           completedAt: new Date(),
         },
       });
+
+      // Invalidate dashboard cache for this user
+      if (workflowRun?.userId) {
+        await cacheService.invalidate(CACHE.DASHBOARD.STATS.KEY(workflowRun.userId));
+        await cacheService.invalidate(
+          CACHE.DASHBOARD.RECENT_RUNS.KEY(workflowRun.userId),
+        );
+      }
 
       runEmitter.emit(`run:${completedTask.runId}`, {
         type: "RUN_COMPLETED",
