@@ -9,6 +9,15 @@ function createMockAgentRepository() {
   };
 }
 
+vi.mock("../cache/cache.service", () => ({
+  cacheService: {
+    get: vi.fn().mockResolvedValue(null), // always cache miss in tests
+    set: vi.fn().mockResolvedValue(undefined),
+    invalidate: vi.fn().mockResolvedValue(undefined),
+    invalidatePattern: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 describe("AgentService", () => {
   let repo: ReturnType<typeof createMockAgentRepository>;
   let service: AgentService;

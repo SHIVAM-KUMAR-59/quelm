@@ -60,3 +60,32 @@ process.on("SIGINT", async () => {
 
   process.exit(0);
 });
+
+export const CACHE = {
+  WORKFLOW: {
+    SINGLE: {
+      KEY: (userId: string, id: string) => `user:${userId}:workflow:${id}`,
+      TTL: 60 * 5,
+    },
+    ALL: {
+      KEY: (userId: string) => `user:${userId}:workflows:all`,
+      TTL: 60 * 5,
+    },
+  },
+  DASHBOARD: {
+    STATS: {
+      KEY: (userId: string) => `user:${userId}:dashboard:stats`,
+      TTL: 60,
+    },
+    RECENT_RUNS: {
+      KEY: (userId: string) => `user:${userId}:dashboard:recent_runs`,
+      TTL: 60,
+    },
+  },
+  AGENTS: {
+    ALL: {
+      KEY: () => `agents:all`,
+      TTL: 60 * 10,
+    },
+  },
+} as const;

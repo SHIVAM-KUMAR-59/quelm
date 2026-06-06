@@ -21,6 +21,15 @@ function createMockOrchestrator() {
   };
 }
 
+vi.mock("../cache/cache.service", () => ({
+  cacheService: {
+    get: vi.fn().mockResolvedValue(null), // always cache miss in tests
+    set: vi.fn().mockResolvedValue(undefined),
+    invalidate: vi.fn().mockResolvedValue(undefined),
+    invalidatePattern: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 describe("WorkflowService", () => {
   let repo: ReturnType<typeof createMockWorkflowRepository>;
   let orchestrator: ReturnType<typeof createMockOrchestrator>;

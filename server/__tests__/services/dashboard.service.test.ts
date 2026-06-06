@@ -8,6 +8,15 @@ function createMockDashboardRepository() {
   };
 }
 
+vi.mock("../cache/cache.service", () => ({
+  cacheService: {
+    get: vi.fn().mockResolvedValue(null), // always cache miss in tests
+    set: vi.fn().mockResolvedValue(undefined),
+    invalidate: vi.fn().mockResolvedValue(undefined),
+    invalidatePattern: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 describe("DashboardService", () => {
   let repo: ReturnType<typeof createMockDashboardRepository>;
   let service: DashboardService;
@@ -26,7 +35,7 @@ describe("DashboardService", () => {
         agentsOnline: 3,
       });
 
-      const result = await service.getStats("user-1");
+      const result = (await service.getStats("user-1")) as any;
 
       expect(result.totalWorkflows).toBe(10);
       expect(result.totalRuns).toBe(50);
@@ -42,7 +51,7 @@ describe("DashboardService", () => {
         agentsOnline: 0,
       });
 
-      const result = await service.getStats("user-1");
+      const result = (await service.getStats("user-1")) as any;
 
       expect(result.successRate).toBe(0);
     });
@@ -55,7 +64,7 @@ describe("DashboardService", () => {
         agentsOnline: 1,
       });
 
-      const result = await service.getStats("user-1");
+      const result = (await service.getStats("user-1")) as any;
 
       expect(result.successRate).toBe(33.3);
     });
@@ -77,7 +86,7 @@ describe("DashboardService", () => {
         },
       ]);
 
-      const result = await service.getRecentRuns("user-1");
+      const result = (await service.getRecentRuns("user-1")) as any;
 
       expect(result).toHaveLength(1);
       expect(result[0].workflowName).toBe("Test Workflow");
@@ -98,7 +107,7 @@ describe("DashboardService", () => {
         },
       ]);
 
-      const result = await service.getRecentRuns("user-1");
+      const result = (await service.getRecentRuns("user-1")) as any;
 
       expect(result[0].duration).toBeNull();
     });

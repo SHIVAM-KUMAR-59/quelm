@@ -1,7 +1,8 @@
 import { AgentStatus, AgentType, Prisma, PrismaClient, TaskStatus } from "@prisma/client";
 import { logger } from "../config/logger.config";
 import { Job, Worker } from "bullmq";
-import { redis } from "../config/redis.config";
+import { CACHE, redis } from "../config/redis.config";
+import { cacheService } from "../cache";
 
 export abstract class BaseAgent {
   // BullMQ worker instance, set in start()
@@ -45,6 +46,9 @@ export abstract class BaseAgent {
       },
     });
 
+    // Invalidate agent cache — status changed to ONLINE
+    await cacheService.invalidate(CACHE.AGENTS.ALL.KEY());
+
     logger.success(`Agent registered: ${this.name} [${this.agentType}]`);
 
     // Create BullMQ worker for this agent type
@@ -87,6 +91,9 @@ export abstract class BaseAgent {
           },
         });
 
+        // Invalidate agent cache — status changed to BUSY
+        await cacheService.invalidate(CACHE.AGENTS.ALL.KEY());
+
         try {
           // Execute agent-specific logic
           const result = await this.execute(jobData.input, jobData.config);
@@ -121,6 +128,9 @@ export abstract class BaseAgent {
               },
             },
           });
+
+          // Invalidate agent cache — status changed back to ONLINE
+          await cacheService.invalidate(CACHE.AGENTS.ALL.KEY());
 
           logger.success(`Job ${jobName} completed [taskId: ${jobData.taskId}]`);
 
@@ -158,6 +168,9 @@ export abstract class BaseAgent {
               },
             },
           });
+
+          // Invalidate agent cache — status changed back to ONLINE
+          await cacheService.invalidate(CACHE.AGENTS.ALL.KEY());
 
           logger.error(
             `Job ${jobName} failed [taskId: ${jobData.taskId}]: ${errorMessage}`,
@@ -222,6 +235,9 @@ export abstract class BaseAgent {
         lastSeenAt: new Date(),
       },
     });
+
+    // Invalidate agent cache — status changed to OFFLINE
+    await cacheService.invalidate(CACHE.AGENTS.ALL.KEY());
 
     logger.success(`Agent stopped: ${this.name} [${this.agentType}]`);
   }
