@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CalendarDays, GitBranch, Play } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight, CalendarDays, GitBranch, Loader2, Play } from "lucide-react"; import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { useTriggerRun } from "@/hooks/use-workflow";
 
@@ -53,7 +52,6 @@ const WorkflowCard = ({
       }
     }
   };
-
   return (
     <>
       <Link
@@ -160,7 +158,11 @@ const WorkflowCard = ({
                 disabled={isPending}
                 className="inline-flex items-center gap-2 rounded-xl bg-card-foreground px-4 py-2 text-sm font-semibold text-background transition-all hover:bg-white disabled:opacity-50"
               >
-                <Play className="h-4 w-4 font-semibold" />
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4 font-semibold" />
+                )}
                 {isPending ? "Triggering..." : "Execute"}
               </button>
             </div>
