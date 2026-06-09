@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CalendarDays, GitBranch, Loader2, Play } from "lucide-react"; import { toast } from "sonner";
+import { ArrowRight, CalendarDays, GitBranch, Loader2, Play } from "lucide-react";
+import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { useTriggerRun } from "@/hooks/use-workflow";
 

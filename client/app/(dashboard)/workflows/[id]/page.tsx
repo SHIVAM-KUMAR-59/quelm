@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   XCircle,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import {
   Background,
@@ -462,7 +463,11 @@ const WorkflowDetailPage = () => {
                 disabled={isPending}
                 className="inline-flex items-center gap-2 rounded-xl bg-card-foreground px-4 py-2 text-sm font-medium text-background transition-all hover:bg-white disabled:opacity-50"
               >
-                <Play className="h-3.5 w-3.5" />
+                {isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Play className="h-3.5 w-3.5" />
+                )}
                 {isPending ? "Triggering..." : "Execute"}
               </button>
             </div>
