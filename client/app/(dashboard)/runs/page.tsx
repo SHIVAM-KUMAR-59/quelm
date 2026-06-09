@@ -15,6 +15,7 @@ const STATUS_STYLES: Record<string, string> = {
   RUNNING: "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
 
   PENDING: "border-zinc-500/20 bg-zinc-500/10 text-zinc-300",
+  CANCELLED: "border-zinc-500/20 bg-zinc-500/10 text-zinc-400",
 };
 
 const formatDuration = (startedAt?: string | null, completedAt?: string | null) => {
