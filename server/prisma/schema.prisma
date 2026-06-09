@@ -10,8 +10,10 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String
+  password  String?
   name      String
+  googleId  String?  @unique
+  githubId  String?  @unique
   createdAt DateTime @default(now())
 
   workflows WorkflowDefinition[]

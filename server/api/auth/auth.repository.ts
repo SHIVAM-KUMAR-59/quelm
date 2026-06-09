@@ -11,8 +11,29 @@ export class AuthRepository {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  async create(data: { email: string; password: string; name: string }): Promise<User> {
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { googleId } });
+  }
+
+  async findByGithubId(githubId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { githubId } });
+  }
+
+  async create(data: {
+    email: string;
+    password?: string;
+    name: string;
+    googleId?: string;
+    githubId?: string;
+  }): Promise<User> {
     return this.prisma.user.create({ data });
+  }
+
+  async updateOAuthId(
+    userId: string,
+    data: { googleId?: string; githubId?: string },
+  ): Promise<User> {
+    return this.prisma.user.update({ where: { id: userId }, data });
   }
 
   async createRefreshToken(data: {

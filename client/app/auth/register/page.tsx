@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/providers/auth-provider";
 import { toast } from "sonner";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -56,6 +57,16 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
+          <SocialAuthButtons actionText="Sign up with" />
+
+          {/* Divider */}
+          <div className="my-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-xs text-zinc-500">or</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
+          {/* Email / Password form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-sm text-zinc-400">
@@ -108,7 +119,7 @@ export default function RegisterPage() {
               disabled={submitting}
               className="mt-2 w-full bg-white text-black hover:bg-zinc-200"
             >
-              {submitting ? "Creating account..." : "Create account"}
+              {submitting ? "Creating account…" : "Create account"}
             </Button>
           </form>
 

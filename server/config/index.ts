@@ -64,6 +64,22 @@ const config = {
   ACCESS_TOKEN_EXPIRY: getString("ACCESS_TOKEN_EXPIRY", "15m"),
   REFRESH_TOKEN_EXPIRY: getString("REFRESH_TOKEN_EXPIRY", "7d"),
 
+  // Google OAuth (optional — server boots without these but /auth/google will be disabled)
+  GOOGLE_CLIENT_ID: getString("GOOGLE_CLIENT_ID", ""),
+  GOOGLE_CLIENT_SECRET: getString("GOOGLE_CLIENT_SECRET", ""),
+  GOOGLE_CALLBACK_URL: getString(
+    "GOOGLE_CALLBACK_URL",
+    "http://localhost:8000/api/auth/google/callback",
+  ),
+
+  // GitHub OAuth (optional)
+  GITHUB_CLIENT_ID: getString("GITHUB_CLIENT_ID", ""),
+  GITHUB_CLIENT_SECRET: getString("GITHUB_CLIENT_SECRET", ""),
+  GITHUB_CALLBACK_URL: getString(
+    "GITHUB_CALLBACK_URL",
+    "http://localhost:8000/api/auth/github/callback",
+  ),
+
   NODE_ENV: getString("NODE_ENV", "development"),
   IS_PRODUCTION: getString("NODE_ENV", "development") === "production",
   IS_DEVELOPMENT: getString("NODE_ENV", "development") === "development",

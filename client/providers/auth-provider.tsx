@@ -21,6 +21,7 @@ type AuthContext = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -40,25 +41,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchMe = useCallback(async (): Promise<User | null> => {
+    try {
+      const res = (await api.get("/api/auth/me")) as { data: { user: User } };
+      return res.data.user;
+    } catch {
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     const token = sessionStorage.getItem("accessToken");
 
     if (token) {
       setToken(token);
-
-      api
-        .get("/api/dashboard/stats")
-        .then(() => {
-          // Token is valid — user stays authenticated
-        })
-        .catch(() => {
-          setToken(null);
+      fetchMe()
+        .then((u) => {
+          if (u) setUser(u);
+          else setToken(null);
         })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [fetchMe]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = (await api.post("/api/auth/login", { email, password })) as {
@@ -78,6 +84,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(res.data.user);
   }, []);
 
+  const loginWithToken = useCallback(
+    async (token: string) => {
+      setToken(token);
+      const u = await fetchMe();
+      if (u) {
+        setUser(u);
+      } else {
+        setToken(null);
+        throw new Error("Failed to fetch user profile after OAuth login");
+      }
+    },
+    [fetchMe],
+  );
+
   const logout = useCallback(async () => {
     try {
       await api.post("/api/auth/logout");
@@ -90,7 +110,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, loginWithToken, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
