@@ -34,13 +34,7 @@ const STATUS_TO_NODE: Record<TaskStatus, AgentNodeData["status"]> = {
   CANCELLED: "idle",
 };
 
-const RUN_STATUS_STYLES: Record<string, string> = {
-  RUNNING: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  COMPLETED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  FAILED: "bg-red-500/10 text-red-400 border-red-500/20",
-  PENDING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  CANCELLED: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-};
+import { RUN_STATUS_STYLES } from "@/lib/constants/status.constants";
 
 const RunMonitorPage = () => {
   const { runId } = useParams<{ runId: string }>();

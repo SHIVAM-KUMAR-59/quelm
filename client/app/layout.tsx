@@ -27,7 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable} antialiased dark`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${mono.variable} antialiased dark`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen">
         <div id="app-root">
           <QueryProvider>

@@ -1,64 +1,12 @@
 "use client";
 
-import {
-  BrainCircuit,
-  Globe,
-  Shuffle,
-  AlertCircle,
-  Bot,
-  Bell,
-  Database,
-} from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Node, Handle, NodeProps, Position } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { AgentNodeData } from "@/lib/types";
 
-const AGENT_META: Record<
-  string,
-  {
-    icon: React.ElementType;
-    label: string;
-    accent: string;
-  }
-> = {
-  LLM_AGENT: {
-    icon: BrainCircuit,
-    label: "LLM Agent",
-    accent: "from-violet-500/20 to-fuchsia-500/10",
-  },
-  HTTP_AGENT: {
-    icon: Globe,
-    label: "HTTP Agent",
-    accent: "from-sky-500/20 to-cyan-500/10",
-  },
-  TRANSFORM_AGENT: {
-    icon: Shuffle,
-    label: "Transform Agent",
-    accent: "from-emerald-500/20 to-teal-500/10",
-  },
-  EXTRACTION_AGENT: {
-    icon: Bot,
-    label: "Extraction Agent",
-    accent: "from-orange-500/20 to-amber-500/10",
-  },
-  NOTIFICATION_AGENT: {
-    icon: Bell,
-    label: "Notification Agent",
-    accent: "from-pink-500/20 to-rose-500/10",
-  },
-  STORAGE_AGENT: {
-    icon: Database,
-    label: "Storage Agent",
-    accent: "from-lime-500/20 to-green-500/10",
-  },
-};
-
-const STATUS_STYLES: Record<AgentNodeData["status"], string> = {
-  idle: "bg-zinc-500",
-  running: "bg-yellow-400 animate-pulse",
-  success: "bg-emerald-400",
-  error: "bg-red-400",
-};
+import { AGENT_META } from "@/lib/constants/agent.constants";
+import { STATUS_STYLES } from "@/lib/constants/status.constants";
 
 const AgentNode = ({ data, selected }: NodeProps<Node<AgentNodeData>>) => {
   const meta = AGENT_META[data.type] ?? AGENT_META["LLM_AGENT"];
