@@ -7,16 +7,7 @@ import { useRuns } from "@/hooks/use-run";
 import { WorkflowRun } from "@/lib/types";
 import ErrorState from "@/components/ui/ErrorState";
 
-const STATUS_STYLES: Record<string, string> = {
-  COMPLETED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-
-  FAILED: "border-red-500/20 bg-red-500/10 text-red-400",
-
-  RUNNING: "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
-
-  PENDING: "border-zinc-500/20 bg-zinc-500/10 text-zinc-300",
-  CANCELLED: "border-zinc-500/20 bg-zinc-500/10 text-zinc-400",
-};
+import { RUN_STATUS_STYLES as STATUS_STYLES } from "@/lib/constants/status.constants";
 
 const formatDuration = (startedAt?: string | null, completedAt?: string | null) => {
   if (!startedAt) return "--";

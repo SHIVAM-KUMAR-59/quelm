@@ -1,31 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Bot, BrainCircuit, Cpu, Server, Workflow } from "lucide-react";
+import { Bot, Server, Workflow } from "lucide-react";
 
 import { useAgents } from "@/hooks/use-agent";
 import { Agent } from "@/lib/types";
 import ErrorState from "@/components/ui/ErrorState";
 
-const STATUS_STYLES: Record<string, string> = {
-  ONLINE: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-
-  BUSY: "border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
-
-  OFFLINE: "border-zinc-500/20 bg-zinc-500/10 text-zinc-400",
-};
-
-const STATUS_DOT: Record<string, string> = {
-  ONLINE: "bg-emerald-400",
-  BUSY: "bg-yellow-400",
-  OFFLINE: "bg-zinc-500",
-};
-
-const AGENT_ICONS: Record<string, React.ElementType> = {
-  LLM_AGENT: BrainCircuit,
-  HTTP_AGENT: Activity,
-  TRANSFORM_AGENT: Cpu,
-};
+import { AGENT_ICONS } from "@/lib/constants/agent.constants";
+import {
+  AGENT_STATUS_STYLES as STATUS_STYLES,
+  STATUS_DOT,
+} from "@/lib/constants/status.constants";
 
 const formatLastSeen = (date?: string | null) => {
   if (!date) return "Unknown";
