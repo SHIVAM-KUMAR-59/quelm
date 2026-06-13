@@ -535,7 +535,7 @@ client/__tests__/
 | Utils        | 11    | Error classes, `{{placeholder}}` interpolation                |
 | Services     | 38    | CRUD validation, ownership checks, auth flow, stats           |
 | Orchestrator | 13    | triggerRun, dependency graph, task dispatch, failure handling |
-| API          | 20    | Auth, workflows, agents, dashboard — via supertest            |
+| API          | 37    | Auth, workflows, agents, dashboard — via supertest            |
 
 #### Frontend
 
